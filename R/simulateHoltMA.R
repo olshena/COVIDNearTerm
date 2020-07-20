@@ -15,8 +15,10 @@
 #' @return paths.ma is moving average matrix of paths
 #' @return smoothed.training is moving average of training data
 #' @return max.predictions is maximum for each row of paths.ma
+#' @import forecast
 
-
+#' @export
+#'
 simulateHoltMA <- function(dat, h, npaths, level, bootstrap, ma){
   n.dat <- length(dat)
   n.dat.h <- n.dat+h

@@ -2,7 +2,7 @@
 % Please edit documentation in R/simulateHoltMA.R
 \name{simulateHoltMA}
 \alias{simulateHoltMA}
-\title{simulate.holt.ma}
+\title{simulateHoltMA}
 \usage{
 simulateHoltMA(dat, h, npaths, level, bootstrap, ma)
 }
@@ -31,5 +31,5 @@ smoothed.training is moving average of training data
 max.predictions is maximum for each row of paths.ma
 }
 \description{
-simulate.holt.ma
+Need a better description of this function
 }

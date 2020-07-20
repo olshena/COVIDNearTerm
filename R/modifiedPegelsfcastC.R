@@ -16,6 +16,10 @@
 #' @return upper is the upper quantile
 #' @return y_paths is a matrix of paths
 #'
+#' @import forecast
+#'
+#' @export
+#'
 modifiedPegelsfcastC <- function(h, obj, npaths, level, bootstrap)
 {
   y_paths <- matrix(NA, nrow = npaths, ncol = h)

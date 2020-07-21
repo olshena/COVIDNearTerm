@@ -3,3 +3,4 @@
 export(modifiedPegelsfcastC)
 export(simulateHoltMA)
 import(forecast)
+import(pracma)

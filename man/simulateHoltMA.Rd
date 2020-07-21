@@ -4,7 +4,16 @@
 \alias{simulateHoltMA}
 \title{simulateHoltMA}
 \usage{
-simulateHoltMA(dat, h, npaths, level, bootstrap, ma)
+simulateHoltMA(
+  dat,
+  h,
+  npaths,
+  level = 0.95,
+  bootstrap,
+  ma,
+  smooth_type = "s",
+  seed = NULL
+)
 }
 \arguments{
 \item{dat}{One-dimensional vector of interest like test positivity.}
@@ -18,6 +27,10 @@ simulateHoltMA(dat, h, npaths, level, bootstrap, ma)
 \item{bootstrap}{Whether to resample errors (TRUE) or use Gaussian errors (FALSE)}
 
 \item{ma}{Width of moving average window in days}
+
+\item{smooth_type}{Type of smoothing used by movavg, see movavg documentation for detials}
+
+\item{seed}{Random seed to use}
 }
 \value{
 A list with the following components:

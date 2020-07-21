@@ -25,7 +25,7 @@ modifiedPegelsfcastC <- function(h, obj, npaths, level, bootstrap)
   y_paths <- matrix(NA, nrow = npaths, ncol = h)
   obj$lambda <- NULL
   for (i in 1:npaths) {
-    y_paths[i, ] <- forecast::simulate.ets(obj, h, future = TRUE, bootstrap = bootstrap)
+    y_paths[i, ] <- forecast:::simulate.ets(obj, h, future = TRUE, bootstrap = bootstrap)
   }
   y_f <- .C("etsforecast",
             as.double(obj$states[length(obj$x) +  1, ]),

@@ -3,9 +3,9 @@
 #' Need a better description of this function
 #'
 #'
-#' @param dat One-dimensional vector of interest like test positivity.
-#' @param h How far in the future to forecast.
-#' @param npaths Number of simulations.
+#' @param dat One-dimensional vector of interest like test positivity
+#' @param h How far in the future to forecast
+#' @param npaths Number of simulations
 #' @param level Prediction level, not used but need for existing code
 #' @param bootstrap Whether to resample errors (TRUE) or use Gaussian errors (FALSE)
 #' @param ma Width of moving average window in days
@@ -14,9 +14,9 @@
 
 #' @return A list with the following components:
 #' @return paths is raw matrix of paths including training data
-#' @return paths.ma is moving average matrix of paths
-#' @return smoothed.training is moving average of training data
-#' @return max.predictions is maximum for each row of paths.ma
+#' @return paths_ma is moving average matrix of paths
+#' @return smoothed_training is moving average of training data
+#' @return max_predictions is maximum for each row of paths_ma
 #' @import forecast
 #' @import pracma
 
@@ -39,11 +39,11 @@ simulateHoltMA <- function(dat, h, npaths, level = 0.95, bootstrap, ma, smooth_t
                                                     bootstrap = bootstrap)$y_paths
   which.0 <- which(paths<0)
   paths[which.0] <- 0
-  paths.ma <- t(apply(paths,1, pracma::movavg, n=(ma-1), type = smooth_type) )
-  smoothed.training <- paths.ma[1,1:n.dat]
-  max.predictions <- apply(paths.ma[,(n.dat+1):n.dat.h],1,max)
-  return(list(paths=paths,
-              paths.ma=paths.ma,
-              smoothed.training=smoothed.training,
-              max.predictions=max.predictions))
+  paths_ma <- t(apply(paths,1, pracma::movavg, n=(ma-1), type = smooth_type) )
+  smoothed_training <- paths_ma[1,1:n.dat]
+  max_predictions <- apply(paths_ma[,(n.dat+1):n.dat.h],1,max)
+  return(list(paths = paths,
+              paths_ma = paths_ma,
+              smoothed_training = smoothed_training,
+              max_predictions = max_predictions))
 }

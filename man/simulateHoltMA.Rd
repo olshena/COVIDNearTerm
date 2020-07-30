@@ -16,11 +16,11 @@ simulateHoltMA(
 )
 }
 \arguments{
-\item{dat}{One-dimensional vector of interest like test positivity.}
+\item{dat}{One-dimensional vector of interest like test positivity}
 
-\item{h}{How far in the future to forecast.}
+\item{h}{How far in the future to forecast}
 
-\item{npaths}{Number of simulations.}
+\item{npaths}{Number of simulations}
 
 \item{level}{Prediction level, not used but need for existing code}
 
@@ -37,11 +37,11 @@ A list with the following components:
 
 paths is raw matrix of paths including training data
 
-paths.ma is moving average matrix of paths
+paths_ma is moving average matrix of paths
 
-smoothed.training is moving average of training data
+smoothed_training is moving average of training data
 
-max.predictions is maximum for each row of paths.ma
+max_predictions is maximum for each row of paths_ma
 }
 \description{
 Need a better description of this function

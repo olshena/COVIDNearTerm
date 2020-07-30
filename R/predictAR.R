@@ -84,13 +84,20 @@ predictAR <- function(buildAR_obj, pdays, wsize, nsim, skip=0, seed=12345, metho
   }
   if(output_type == "max") {
     return_object <- data.frame(max = apply(output, 1, max) )
+    return_object$rep <- 1:nsim
   }
   if(output_type=="mean") {
     return_object <- data.frame(mean = apply(output, 1, mean) )
+    return_object$rep <- 1:nsim
   }
   if(output_type == "all" ) {
-    return_object <- data.frame( apply(output, 1, summary) )
-    return_object$type <- rownames(return_object)
+    return_object <- data.frame( t( apply(output, 1, summary) ) )
+    # return_object$type <- rownames(return_object)
+    names( return_object ) <- gsub("\\.|X", "", names( return_object ) )
+    names( return_object ) <- gsub("1st", "First", names( return_object ) )
+    names( return_object ) <- gsub("3rd", "Third", names( return_object ) )
+    return_object$rep <- 1:nsim
+
   }
 
   return(return_object)

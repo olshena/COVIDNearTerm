@@ -4,18 +4,18 @@
 \alias{modifiedPegelsfcastC}
 \title{Modified version of pegelsfcast.C}
 \usage{
-modifiedPegelsfcastC(h, obj, npaths, level, bootstrap)
+modifiedPegelsfcastC(pdays, obj, nsim, level, bootstrap)
 }
 \arguments{
-\item{h}{How far in the future to forecast.}
+\item{pdays}{How far in the future to forecast}
 
-\item{obj}{A mode object hard-coded to the Holt model.}
+\item{obj}{A mode object hard-coded to the Holt model}
 
-\item{npaths}{Number of simulations.}
+\item{nsim}{Number of simulations}
 
-\item{level}{Quantile of distribution. Not utilized but maintained for consistency.}
+\item{level}{Quantile of distribution. Not utilized but maintained for consistency}
 
-\item{bootstrap}{Whether to resample errors (TRUE) or use Gaussian errors (FALSE).}
+\item{bootstrap}{Whether to resample errors (TRUE) or use Gaussian errors (FALSE)}
 }
 \value{
 A list with the following components:

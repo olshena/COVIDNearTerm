@@ -32,6 +32,7 @@ predictAR <- function(buildAR_obj, pdays, nsim, skip=0, seed=NULL, output_type="
 
   ###Adding variable dat that will be used in lowess of error, dropping first point since no prediction
   dat <- buildAR_obj$vec[-1]
+
   ###Skip the first skip features in the vector
   if( skip > 0 )
   {
@@ -44,22 +45,29 @@ predictAR <- function(buildAR_obj, pdays, nsim, skip=0, seed=NULL, output_type="
   ###Use the median absolute deviation divided by the square root of two to estimate robustly the standard deviation of the phis
   sdphi <- mad(diff_phis) / sqrt(2)
 
-  ###Use equal weighting by default, if not, triangle
+  ###Use unweighted by default, if not, triangle
+
+  if( !(method %in% c("unweighted", "equal", "triangle") ) ) {
+    stop("Method must be either equal or triangle")
+  }
   if ( method == "equal" ) {
     weights_phi <- rep(1, wsize) / wsize
   }
   if( method == "triangle" ) {
     weights_phi <- ( 1:wsize ) / sum( 1:wsize )
   }
-  if( !(method %in% c("equal","triangle") ) ) {
-    stop("Method must be either equal or triangle")
+  if ( method == "unweighted" ) {
+    weights_phi <- rep(1, wsize) / wsize
   }
+
 
   ###The output is a matrix of nsim by pdays with each row a potential path
   ###Right now loop over nsim then pdays, should be done in a function
   ###Look to separate out errors from phis
   ###Set up output
-  output <- matrix(NA,nsim,pdays)
+  # i <- 1
+  # j <- 1
+  output <- matrix(NA, nsim, pdays)
   for(i in 1:nsim) {
     for(j in 1:pdays)
     {
@@ -76,14 +84,20 @@ predictAR <- function(buildAR_obj, pdays, nsim, skip=0, seed=NULL, output_type="
         old_error <- new_error
       }
       else {
-        current_phis <- c( current_phis[-1], rnorm(1,weighted_phi,sdphi) )
-        weighted_phi <- sum( weights_phi*current_phis )
+        current_phis <- c( current_phis[ -to_remove ], rnorm(1, weighted_phi, sdphi) )
+        weighted_phi <- sum( weights_phi * current_phis )
         new_value <- weighted_phi * old_value
         new_error <- old_error + addError( new_value, lowess_fit )
         output[i,j] <- round( new_value + new_error )
         old_value <- new_value
         old_error <- new_error
       }
+      if( method == "unweighted" ){
+        to_remove <- sample(x = wsize, size = 1)
+      } else {
+        to_remove <- 1
+      }
+
     }
   }
   if(output_type == "max") {

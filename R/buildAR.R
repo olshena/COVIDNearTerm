@@ -7,6 +7,7 @@
 #' @param vec A vector of numeric data
 #' @param wsize Number of prior observations to use for averaging
 #' @param method Type of weighting to use
+#' @param seed Seed for random number generator
 
 #' @return A list with the following components:
 #' @return wsize is the number of prior observations used for averaging
@@ -19,18 +20,29 @@
 #' @export
 #'
 
-buildAR <- function(vec, wsize, method = c("equal","triangle") ) {
+buildAR <- function(vec, wsize, method = c("unweighted", "equal", "triangle"), seed = NULL ) {
+
+  if( !is.null(seed) ){
+    set.seed(seed)
+  }
+
   n_vec <- length(vec)
 
-  ###Use equal or triangle weighting
+  if(length(method) > 1) {
+    cat("Method has length > 1. Using first item:", method[1], "\n")
+    method <- method[1]
+  }
+  if( !(method %in% c("unweighted", "equal", "triangle") ) ) {
+    stop("Method must be either unweighted, equal or triangle")
+  }
   if ( method == "equal" ) {
     weights_phi <- rep(1, wsize) / wsize
   }
   if( method == "triangle" ) {
     weights_phi <- ( 1:wsize ) / sum( 1:wsize )
   }
-  if( !(method %in% c("equal","triangle") ) ) {
-    stop("Method must be either equal or triangle")
+  if( method == "unweighted" ) {
+    weights_phi <- rep(1, wsize) / wsize
   }
 
   if( wsize > n_vec ){
@@ -39,17 +51,47 @@ buildAR <- function(vec, wsize, method = c("equal","triangle") ) {
 
   ###Calculate initial phis
   initphi <- c(1, vec[-1] / vec[-n_vec] )
+  # initphi <- 1:n_vec
+
   ###Take weighted sum of initia phis to get final phi
   ###Fill in 1s as needed before estimating phis
   finalphi <- rep(NA,n_vec)
 
-  for(i in 1:n_vec) {
-    if(i < wsize) {
-      new_data <- c( rep(1, wsize - i), initphi[1:i] )
-    } else {
-      new_data <- initphi[ ( i - wsize + 1 ):i]
+  if( method == "unweighted" ) {
+    for(i in 1:n_vec) {
+      if(i == 1) {
+        to_remove <- 1
+      } else {
+        #determine which random day to remove
+        to_remove <- sample(x = wsize, size = 1)
+      }
+
+      if(i < wsize) {
+        to_remove <- 1
+        current_data <- c( rep(1, wsize - i), initphi[1:i] )
+      } else {
+        to_remove <- sample(x = wsize, size = 1)
+        current_data <- c(current_data, initphi[i])
+      }
+      # cat("phi calc data\n")
+      # print(current_data)
+      finalphi[i] <- sum(weights_phi * current_data)
+
+      # cat("Removing", current_data[ to_remove ], "\n")
+      current_data <- current_data[ -to_remove ]
+      # print(current_data)
+
     }
-    finalphi[i] <- sum(weights_phi * new_data)
+  } else {
+    for(i in 1:n_vec) {
+      if(i < wsize) {
+        new_data <- c( rep(1, wsize - i), initphi[1:i] )
+      } else {
+        new_data <- initphi[ ( i - wsize + 1 ):i]
+      }
+      finalphi[i] <- sum(weights_phi * new_data)
+
+    }
 
   }
   ###Fits of the data are phi times data, subtract last point because phi only at t-1

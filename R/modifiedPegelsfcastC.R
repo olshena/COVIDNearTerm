@@ -4,11 +4,11 @@
 #' implements the work in Forecasting: Principles and Practice by
 #' Rob J Hyndman and George Athanasopoulos (https://otexts.com/fpp2/)
 #'
-#' @param h How far in the future to forecast.
-#' @param obj A mode object hard-coded to the Holt model.
-#' @param npaths Number of simulations.
-#' @param level Quantile of distribution. Not utilized but maintained for consistency.
-#' @param bootstrap Whether to resample errors (TRUE) or use Gaussian errors (FALSE).
+#' @param pdays How far in the future to forecast
+#' @param obj A mode object hard-coded to the Holt model
+#' @param nsim Number of simulations
+#' @param level Quantile of distribution. Not utilized but maintained for consistency
+#' @param bootstrap Whether to resample errors (TRUE) or use Gaussian errors (FALSE)
 
 #' @return A list with the following components:
 #' @return mu is the mean path
@@ -20,12 +20,12 @@
 #'
 #' @export
 #'
-modifiedPegelsfcastC <- function(h, obj, npaths, level, bootstrap)
+modifiedPegelsfcastC <- function(pdays, obj, nsim, level, bootstrap)
 {
-  y_paths <- matrix(NA, nrow = npaths, ncol = h)
+  y_paths <- matrix(NA, nrow = nsim, ncol = pdays)
   obj$lambda <- NULL
-  for (i in 1:npaths) {
-    y_paths[i, ] <- forecast:::simulate.ets(obj, h, future = TRUE, bootstrap = bootstrap)
+  for (i in 1:nsim) {
+    y_paths[i, ] <- forecast:::simulate.ets(obj, pdays, future = TRUE, bootstrap = bootstrap)
   }
   y_f <- .C("etsforecast",
             as.double(obj$states[length(obj$x) +  1, ]),
@@ -33,8 +33,8 @@ modifiedPegelsfcastC <- function(h, obj, npaths, level, bootstrap)
             as.integer(switch(obj$components[2], N = 0, A = 1, M = 2)),
             as.integer(switch(obj$components[3], N = 0, A = 1, M = 2)),
             as.double(ifelse(obj$components[4] == "FALSE", 1, obj$par["phi"])),
-            as.integer(h),
-            as.double(numeric(h)),
+            as.integer(pdays),
+            as.double(numeric(pdays)),
             PACKAGE = "forecast")[[7]]
   if (abs(y_f[1] + 99999) < 1e-07) {
     stop("Problem with multiplicative damped trend")

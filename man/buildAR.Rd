@@ -4,7 +4,7 @@
 \alias{buildAR}
 \title{Builds an autoregressive model}
 \usage{
-buildAR(vec, wsize, method = c("equal", "triangle"))
+buildAR(vec, wsize, method = c("unweighted", "equal", "triangle"), seed = NULL)
 }
 \arguments{
 \item{vec}{A vector of numeric data}
@@ -12,6 +12,8 @@ buildAR(vec, wsize, method = c("equal", "triangle"))
 \item{wsize}{Number of prior observations to use for averaging}
 
 \item{method}{Type of weighting to use}
+
+\item{seed}{Seed for random number generator}
 }
 \value{
 A list with the following components:

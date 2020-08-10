@@ -6,8 +6,8 @@
 \usage{
 simulateHoltMA(
   dat,
-  h,
-  npaths,
+  pdays,
+  nsim,
   level = 0.95,
   bootstrap,
   ma,
@@ -19,9 +19,9 @@ simulateHoltMA(
 \arguments{
 \item{dat}{One-dimensional vector of interest like test positivity}
 
-\item{h}{How far in the future to forecast}
+\item{pdays}{How far in the future to forecast}
 
-\item{npaths}{Number of simulations}
+\item{nsim}{Number of simulations}
 
 \item{level}{Prediction level, not used but need for existing code}
 

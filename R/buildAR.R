@@ -58,6 +58,7 @@ buildAR <- function(vec, wsize, method = c("equal","triangle") ) {
   errors <- vec[-1] - fits
 
   return_object <- list(wsize = wsize,
+                        method = method,
                         vec = vec,
                         fits = fits,
                         errors = errors,

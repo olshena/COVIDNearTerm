@@ -12,6 +12,7 @@ simulateHoltMA(
   bootstrap,
   ma,
   smooth_type = "s",
+  model_type = "AAN",
   seed = NULL
 )
 }
@@ -29,6 +30,8 @@ simulateHoltMA(
 \item{ma}{Width of moving average window in days}
 
 \item{smooth_type}{Type of smoothing used by movavg, see movavg documentation for detials}
+
+\item{model_type}{From the ets documentation: Usually a three-character string identifying method using the framework terminology of Hyndman et al. (2002) and Hyndman et al. (2008). The first letter denotes the error type ("A", "M" or "Z"); the second letter denotes the trend type ("N","A","M" or "Z"); and the third letter denotes the season type ("N","A","M" or "Z"). In all cases, "N"=none, "A"=additive, "M"=multiplicative and "Z"=automatically selected. So, for example, "ANN" is simple exponential smoothing with additive errors, "MAM" is multiplicative Holt-Winters' method with multiplicative errors, and so on.}
 
 \item{seed}{Random seed to use}
 }

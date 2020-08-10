@@ -4,31 +4,18 @@
 \alias{predictAR}
 \title{Makes predictions using an autogregressive model from the buildAR function}
 \usage{
-predictAR(
-  buildAR_obj,
-  pdays,
-  wsize,
-  nsim,
-  skip = 0,
-  seed = 12345,
-  method = c("equal", "triangle"),
-  output_type = "max"
-)
+predictAR(buildAR_obj, pdays, nsim, skip = 0, seed = NULL, output_type = "max")
 }
 \arguments{
 \item{buildAR_obj}{An object output from the buildAR function}
 
 \item{pdays}{Number of days into the future to make predictions}
 
-\item{wsize}{Number of prior observations to use for averaging}
-
 \item{nsim}{Number of simulations}
 
 \item{skip}{Number of input values to skip}
 
 \item{seed}{Seed for random number generator}
-
-\item{method}{Type of weighting to use}
 
 \item{output_type}{Type of output}
 }

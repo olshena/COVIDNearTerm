@@ -10,6 +10,7 @@
 #' @param bootstrap Whether to resample errors (TRUE) or use Gaussian errors (FALSE)
 #' @param ma Width of moving average window in days
 #' @param smooth_type Type of smoothing used by movavg, see movavg documentation for detials
+#' @param model_type 	From the ets documentation: Usually a three-character string identifying method using the framework terminology of Hyndman et al. (2002) and Hyndman et al. (2008). The first letter denotes the error type ("A", "M" or "Z"); the second letter denotes the trend type ("N","A","M" or "Z"); and the third letter denotes the season type ("N","A","M" or "Z"). In all cases, "N"=none, "A"=additive, "M"=multiplicative and "Z"=automatically selected. So, for example, "ANN" is simple exponential smoothing with additive errors, "MAM" is multiplicative Holt-Winters' method with multiplicative errors, and so on.
 #' @param seed Random seed to use
 
 #' @return A list with the following components:
@@ -22,7 +23,7 @@
 
 #' @export
 #'
-simulateHoltMA <- function(dat, h, npaths, level = 0.95, bootstrap, ma, smooth_type = "s", seed = NULL){
+simulateHoltMA <- function(dat, h, npaths, level = 0.95, bootstrap, ma, smooth_type = "s", model_type = "AAN", seed = NULL){
 
   if( !is.null(seed) ){
     set.seed(seed)
@@ -31,7 +32,7 @@ simulateHoltMA <- function(dat, h, npaths, level = 0.95, bootstrap, ma, smooth_t
   n.dat.h <- n.dat+h
   paths <- matrix(NA,npaths,n.dat.h)
   paths[,1:n.dat] <- matrix(rep(dat,npaths),ncol=n.dat,byrow=TRUE)
-  model.ets <- forecast::ets(dat,model="AAN")
+  model.ets <- forecast::ets(dat, model = model_type)
   paths[,(n.dat+1):n.dat.h] <- modifiedPegelsfcastC(h = h,
                                                     obj = model.ets,
                                                     npaths = npaths,

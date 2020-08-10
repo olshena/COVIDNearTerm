@@ -4,23 +4,27 @@
 #'
 #' @param buildAR_obj An object output from the buildAR function
 #' @param pdays Number of days into the future to make predictions
-#' @param wsize Number of prior observations to use for averaging
 #' @param nsim  Number of simulations
 #' @param skip Number of input values to skip
 #' @param seed Seed for random number generator
-#' @param method Type of weighting to use
 #' @param output_type Type of output
 
 #' @return A data frame containing the specified output for each sim
 #'
 #' @export
 #'
-predictAR <- function(buildAR_obj, pdays, wsize, nsim, skip=0, seed=12345, method=c("equal","triangle"), output_type="max") {
+predictAR <- function(buildAR_obj, pdays, nsim, skip=0, seed=NULL, output_type="max") {
 
   if( class(buildAR_obj) != "buildAR") {
     stop("buildAR_obj must be a buildAR object" )
   }
-  set.seed(seed)
+  if( !is.null(seed) ){
+    set.seed(seed)
+  }
+
+  method <- buildAR_obj$method
+  wsize <- buildAR_obj$wsize
+
   n_vec <- length(buildAR_obj$vec)
   initphi <- buildAR_obj$initphi
   errors <- buildAR_obj$errors

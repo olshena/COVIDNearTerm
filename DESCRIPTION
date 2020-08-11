@@ -1,6 +1,6 @@
 Package: COVIDNearTerm
 Title: Near Term Prediction of COVID-Related Population Metrics
-Version: 0.0003
+Version: 0.0004
 Authors@R: 
     person(given = "First",
            family = "Last",

@@ -48,7 +48,7 @@ predictAR <- function(buildAR_obj, pdays, nsim, skip=0, seed=NULL, output_type="
   ###Use unweighted by default, if not, triangle
 
   if( !(method %in% c("unweighted", "equal", "triangle") ) ) {
-    stop("Method must be either equal or triangle")
+    stop("Method must be unweighted, equal or triangle")
   }
   if ( method == "equal" ) {
     weights_phi <- rep(1, wsize) / wsize
@@ -92,11 +92,11 @@ predictAR <- function(buildAR_obj, pdays, nsim, skip=0, seed=NULL, output_type="
         old_value <- new_value
         old_error <- new_error
       }
-      if( method == "unweighted" ){
-        to_remove <- sample(x = wsize, size = 1)
-      } else {
+      # if( method == "unweighted" ){
+      #   to_remove <- sample(x = wsize, size = 1)
+      # } else {
         to_remove <- 1
-      }
+      # }
 
     }
   }

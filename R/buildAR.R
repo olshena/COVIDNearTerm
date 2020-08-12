@@ -57,32 +57,32 @@ buildAR <- function(vec, wsize, method = c("unweighted", "equal", "triangle"), s
   ###Fill in 1s as needed before estimating phis
   finalphi <- rep(NA,n_vec)
 
-  if( method == "unweighted" ) {
-    for(i in 1:n_vec) {
-      if(i == 1) {
-        to_remove <- 1
-      } else {
-        #determine which random day to remove
-        to_remove <- sample(x = wsize, size = 1)
-      }
-
-      if(i < wsize) {
-        to_remove <- 1
-        current_data <- c( rep(1, wsize - i), initphi[1:i] )
-      } else {
-        to_remove <- sample(x = wsize, size = 1)
-        current_data <- c(current_data, initphi[i])
-      }
-      # cat("phi calc data\n")
-      # print(current_data)
-      finalphi[i] <- sum(weights_phi * current_data)
-
-      # cat("Removing", current_data[ to_remove ], "\n")
-      current_data <- current_data[ -to_remove ]
-      # print(current_data)
-
-    }
-  } else {
+  # if( method == "unweighted" ) {
+  #   for(i in 1:n_vec) {
+  #     if(i == 1) {
+  #       to_remove <- 1
+  #     } else {
+  #       #determine which random day to remove
+  #       to_remove <- sample(x = wsize, size = 1)
+  #     }
+  #
+  #     if(i < wsize) {
+  #       to_remove <- 1
+  #       current_data <- c( rep(1, wsize - i), initphi[1:i] )
+  #     } else {
+  #       to_remove <- sample(x = wsize, size = 1)
+  #       current_data <- c(current_data, initphi[i])
+  #     }
+  #     # cat("phi calc data\n")
+  #     # print(current_data)
+  #     finalphi[i] <- sum(weights_phi * current_data)
+  #
+  #     # cat("Removing", current_data[ to_remove ], "\n")
+  #     current_data <- current_data[ -to_remove ]
+  #     # print(current_data)
+  #
+  #   }
+  # } else {
     for(i in 1:n_vec) {
       if(i < wsize) {
         new_data <- c( rep(1, wsize - i), initphi[1:i] )
@@ -90,10 +90,8 @@ buildAR <- function(vec, wsize, method = c("unweighted", "equal", "triangle"), s
         new_data <- initphi[ ( i - wsize + 1 ):i]
       }
       finalphi[i] <- sum(weights_phi * new_data)
-
     }
-
-  }
+  # }
   ###Fits of the data are phi times data, subtract last point because phi only at t-1
   fits <- finalphi[-n_vec] * vec[-n_vec]
   ###Errors are data minus fits, subtract first point because it cannot be predicted

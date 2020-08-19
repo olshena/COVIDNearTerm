@@ -7,7 +7,7 @@
 #' @param nsim  Number of simulations
 #' @param skip Number of input values to skip
 #' @param seed Seed for random number generator
-#' @param output_type Type of output
+#' @param output_type Type of output to predict, currently max, mean, or all are valid
 
 #' @return A data frame containing the specified output for each sim
 #'

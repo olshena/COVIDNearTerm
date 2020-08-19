@@ -6,6 +6,7 @@
 \usage{
 simulateAR(
   vec,
+  x = NULL,
   wsize,
   method = c("unweighted", "equal", "triangle"),
   pdays,

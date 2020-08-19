@@ -17,7 +17,7 @@ predictAR(buildAR_obj, pdays, nsim, skip = 0, seed = NULL, output_type = "max")
 
 \item{seed}{Seed for random number generator}
 
-\item{output_type}{Type of output}
+\item{output_type}{Type of output to predict, currently max, mean, or all are valid}
 }
 \value{
 A data frame containing the specified output for each sim

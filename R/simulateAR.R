@@ -17,9 +17,9 @@
 #' @export
 #'
 #'
-simulateAR <- function(vec, wsize, method = c("unweighted", "equal", "triangle"), pdays, nsim, skip  = 0, seed = NULL, output_type = "all"){
+simulateAR <- function(vec, x = NULL, wsize, method = c("unweighted", "equal", "triangle"), pdays, nsim, skip  = 0, seed = NULL, output_type = "all"){
 
-  build_ar_object <- buildAR(vec, wsize, method = method, seed = seed)
+  build_ar_object <- buildAR(vec, x, wsize, method = method, seed = seed)
 
   ar_out <- predictAR(buildAR_obj = build_ar_object,
                       pdays = pdays,

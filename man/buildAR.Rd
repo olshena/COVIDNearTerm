@@ -4,10 +4,18 @@
 \alias{buildAR}
 \title{Builds an autoregressive model}
 \usage{
-buildAR(vec, wsize, method = c("unweighted", "equal", "triangle"), seed = NULL)
+buildAR(
+  vec,
+  x = NULL,
+  wsize,
+  method = c("unweighted", "equal", "triangle"),
+  seed = NULL
+)
 }
 \arguments{
 \item{vec}{A vector of numeric data}
+
+\item{x}{A vector containing a covariate with which to generate AR model, if unspecified, defaults to vec}
 
 \item{wsize}{Number of prior observations to use for averaging}
 

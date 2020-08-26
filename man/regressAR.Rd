@@ -7,14 +7,13 @@
 regressAR(
   vec,
   x = NULL,
-  predict_variable = "Max",
+  output_type = "Max",
   wsize,
   method = c("unweighted", "equal", "triangle"),
   pdays,
   nsim,
   skip = 0,
   seed = NULL,
-  output_type = "all",
   regression_weights = NULL
 )
 }
@@ -23,7 +22,7 @@ regressAR(
 
 \item{x}{A data frame containing covariates with which to generate predictive model, if unspecified, defaults to vec}
 
-\item{predict_variable}{A string indicating which outcome measure should be predicted. Must be one of Min, FirstQu, Median, Mean, ThirdQu, or Max}
+\item{output_type}{Type of output to predict, currently max, mean, or all are valid}
 
 \item{wsize}{Number of prior observations to use for averaging}
 
@@ -37,9 +36,9 @@ regressAR(
 
 \item{seed}{Seed for random number generator}
 
-\item{output_type}{Type of output to predict, currently max, mean, or all are valid}
-
 \item{regression_weights}{An array specifying regression weights. Currently not implemented}
+
+\item{predict_variable}{A string indicating which outcome measure should be predicted. Must be one of Min, FirstQu, Median, Mean, ThirdQu, or Max}
 }
 \value{
 A data frame containing the specified output statistics for each sim

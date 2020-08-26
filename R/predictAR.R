@@ -60,7 +60,6 @@ predictAR <- function(buildAR_obj, pdays, nsim, skip=0, seed=NULL, output_type="
     weights_phi <- rep(1, wsize) / wsize
   }
 
-
   ###The output is a matrix of nsim by pdays with each row a potential path
   ###Right now loop over nsim then pdays, should be done in a function
   ###Look to separate out errors from phis
@@ -110,13 +109,16 @@ predictAR <- function(buildAR_obj, pdays, nsim, skip=0, seed=NULL, output_type="
   }
   if(output_type == "all" ) {
     return_object <- data.frame( t( apply(output, 1, summary) ) )
-    # return_object$type <- rownames(return_object)
     names( return_object ) <- gsub("\\.|X", "", names( return_object ) )
     names( return_object ) <- gsub("1st", "First", names( return_object ) )
     names( return_object ) <- gsub("3rd", "Third", names( return_object ) )
     return_object$rep <- 1:nsim
 
   }
+  if(output_type == "predictions" ) {
+    return_object <- data.frame( t( output ) )
+    return_object$t <- 1:pdays
 
+  }
   return(return_object)
 }

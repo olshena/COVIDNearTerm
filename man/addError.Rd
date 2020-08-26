@@ -4,7 +4,7 @@
 \alias{addError}
 \title{Generates error using SD derived from lowess model}
 \usage{
-addError(xpred, lowess_obj)
+addError(xpred, lowess_obj, n_draws = 1)
 }
 \arguments{
 \item{xpred}{a predicted x value}

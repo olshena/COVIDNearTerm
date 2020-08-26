@@ -11,13 +11,13 @@
 #'
 
 
-addError <- function(xpred, lowess_obj)
+addError <- function(xpred, lowess_obj, n_draws = 1)
 {
   # removing duplicates from lowess_obj to avoid
   # duplicate warning from approx()
   lowess_obj_reduced <- as.list( unique( data.frame(lowess_obj) ) )
 
   sd_dat <- sqrt( approx(lowess_obj_reduced, xout = xpred, rule = 2)$y)
-  rnorm(1, 0, sd_dat)
+  rnorm(n_draws, 0, sd_dat)
 }
 

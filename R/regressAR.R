@@ -78,12 +78,14 @@ regressAR <- function(vec,
     # model vec ~ fits
     variable_string <- paste0(names(x), collapse = " + ")
 
-    model_formula <- as.formula( paste0( "vec ~ ", variable_string ) )
+    model_formula <- as.formula( paste0( "vec ~ ", variable_string, " - 1" ) )
 
     # remove intercept
     lm_object <- lm(data = model_data, formula = model_formula)
 
     errors_regression <- residuals(lm_object)
+    lowess_fit_regression <- lowess(vec[-1], errors_regression^2)
+
   }
 
   # make predictions on individual variables

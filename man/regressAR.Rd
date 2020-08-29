@@ -2,7 +2,7 @@
 % Please edit documentation in R/regressAR.R
 \name{regressAR}
 \alias{regressAR}
-\title{Combines multiple autoregressive models in a least sqares regression model}
+\title{Combines multiple autoregressive models into one prediction model using a least sqares regression model}
 \usage{
 regressAR(
   vec,
@@ -22,11 +22,11 @@ regressAR(
 
 \item{x}{A data frame containing covariates with which to generate predictive model, if unspecified, defaults to vec}
 
-\item{output_type}{Type of output to predict, currently max, mean, or all are valid}
+\item{output_type}{A string indicating which outcome measure should be predicted. Must be one of Min, FirstQu, Median, Mean, ThirdQu, or Max}
 
 \item{wsize}{Number of prior observations to use for averaging}
 
-\item{method}{Type of weighting to use}
+\item{method}{Type of weighting to use in individual prediction models}
 
 \item{pdays}{Number of days into the future to make predictions}
 
@@ -37,8 +37,6 @@ regressAR(
 \item{seed}{Seed for random number generator}
 
 \item{regression_weights}{An array specifying regression weights. Currently not implemented}
-
-\item{predict_variable}{A string indicating which outcome measure should be predicted. Must be one of Min, FirstQu, Median, Mean, ThirdQu, or Max}
 }
 \value{
 A data frame containing the specified output statistics for each sim

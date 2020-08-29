@@ -56,11 +56,11 @@ buildAR <- function(vec, x = NULL, wsize, method = c("unweighted", "equal", "tri
     weights_phi <- rep(1, wsize) / wsize
   }
 
+  n_vec <- length(vec)
+
   if( wsize > n_vec ){
     stop("wsize can't be larger than the length of vec")
   }
-
-  n_vec <- length(vec)
 
   ###Calculate initial phis
   initphi <- c(1, vec[-1] / x[-n_vec] )

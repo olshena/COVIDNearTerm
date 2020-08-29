@@ -50,8 +50,8 @@ regressAR <- function(vec,
     stop("if specified, x must be the same length as vec")
   }
 
-  if( !(predict_variable %in% c("Min", "FirstQu", "Median", "Mean", "ThirdQu", "Max") ) ) {
-    stop("predict_var not valid, must be one of Min, FirstQu, Median, Mean, ThirdQu, or Max")
+  if( !(output_type %in% c("min", "max", "mean", "all") ) ) {
+    stop("output_type not valid, must be one of min, max, mean, or all")
   }
 
   n_predictors <- ncol(x)
@@ -128,6 +128,10 @@ regressAR <- function(vec,
     return_stat <- data.frame(max = apply(output, 1, max) )
     return_stat$rep <- 1:nsim
   }
+  if(output_type == "min") {
+    return_stat <- data.frame(min = apply(output, 1, max) )
+    return_stat$rep <- 1:nsim
+  }
   if(output_type=="mean") {
     return_stat <- data.frame(mean = apply(output, 1, mean) )
     return_stat$rep <- 1:nsim
@@ -137,6 +141,7 @@ regressAR <- function(vec,
     names( return_stat ) <- gsub("\\.|X", "", names( return_stat ) )
     names( return_stat ) <- gsub("1st", "First", names( return_stat ) )
     names( return_stat ) <- gsub("3rd", "Third", names( return_stat ) )
+    names( return_stat ) <- tolower(names( return_stat ))
     return_stat$rep <- 1:nsim
 
   }

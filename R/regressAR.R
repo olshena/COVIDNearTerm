@@ -111,10 +111,11 @@ regressAR <- function(vec,
 
 
   # generate regression predicted values
+  predicted_data$y_hat_mean = predict(object = lm_object, predicted_data)
+
   predicted_values <- predicted_data %>%
     group_by(pred_set) %>%
-    mutate( y_hat_mean = predict(object = lm_object, newdata = data.frame(x = x, w = w, z = z)),
-            errors = addError(y_hat_mean, lowess_fit_regression, n_draws = pdays),
+    mutate( errors = addError(y_hat_mean, lowess_fit_regression, n_draws = pdays),
             predicted_value = y_hat_mean + errors) %>%
     as.data.frame
 

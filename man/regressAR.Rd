@@ -14,7 +14,9 @@ regressAR(
   nsim,
   skip = 0,
   seed = NULL,
-  regression_weights = NULL
+  regression_weights = NULL,
+  rhat_method = c("none", "geometric", "arithmetic"),
+  debug = FALSE
 )
 }
 \arguments{
@@ -37,9 +39,13 @@ regressAR(
 \item{seed}{Seed for random number generator}
 
 \item{regression_weights}{An array specifying regression weights. Currently not implemented}
+
+\item{rhat_method}{Method for calculating rhat, if "none", rhat = 1 and has no effect}
+
+\item{debug}{TRUE returns buildAR objects in addition to standard output}
 }
 \value{
-A data frame containing the specified output statistics for each sim
+A list containing the specified output statistics for each sim
 }
 \description{
 Need to fill in description data

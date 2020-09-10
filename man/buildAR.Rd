@@ -9,7 +9,8 @@ buildAR(
   x = NULL,
   wsize,
   method = c("unweighted", "equal", "triangle"),
-  seed = NULL
+  seed = NULL,
+  rhat_method = c("none", "geometric", "arithmetic")
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ buildAR(
 \item{method}{Type of weighting to use}
 
 \item{seed}{Seed for random number generator}
+
+\item{rhat_method}{Method for calculating rhat, if "none", rhat = 1 and has no effect}
 }
 \value{
 A list with the following components:

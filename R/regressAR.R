@@ -13,8 +13,10 @@
 #' @param skip Number of input values to skip
 #' @param seed Seed for random number generator
 #' @param regression_weights An array specifying regression weights. Currently not implemented
+#' @param rhat_method Method for calculating rhat, if "none", rhat = 1 and has no effect
+#' @param debug TRUE returns buildAR objects in addition to standard output
 
-#' @return A data frame containing the specified output statistics for each sim
+#' @return A list containing the specified output statistics for each sim
 #'
 #' @import dplyr
 #' @import purrr
@@ -32,7 +34,9 @@ regressAR <- function(vec,
                       nsim,
                       skip = 0,
                       seed = NULL,
-                      regression_weights = NULL){
+                      regression_weights = NULL,
+                      rhat_method = c("none", "geometric", "arithmetic"),
+                      debug = FALSE){
 
   if( !is.null(seed) ){
     set.seed(seed)
@@ -54,6 +58,11 @@ regressAR <- function(vec,
     stop("output_type not valid, must be one of min, max, mean, or all")
   }
 
+  if(length(rhat_method) > 1) {
+    rhat_method <- rhat_method[1]
+  }
+
+  x_names <- names(x)
   n_predictors <- ncol(x)
   n_vec <- length(vec)
 
@@ -62,7 +71,8 @@ regressAR <- function(vec,
                               buildAR,
                               vec = vec,
                               wsize = wsize,
-                              method = method)
+                              method = method,
+                              rhat_method = rhat_method)
 
   # fit regression model on buildAR variables
   model_data <- map2_dfr(build_ar_object_list, names(build_ar_object_list), function(.build_ar_object, .name, .vec){
@@ -109,14 +119,15 @@ regressAR <- function(vec,
     dcast(pred_set + t ~ variable) %>%
     arrange(pred_set, t)
 
-
   # generate regression predicted values
   predicted_data$y_hat_mean = predict(object = lm_object, predicted_data)
 
+  names(predicted_data)[which( names( predicted_data ) %in% x_names ) ] <- paste0("y_", x_names)
+
   predicted_values <- predicted_data %>%
     group_by(pred_set) %>%
-    mutate( errors = addError(y_hat_mean, lowess_fit_regression, n_draws = pdays),
-            predicted_value = y_hat_mean + errors) %>%
+    mutate( error = addError(y_hat_mean, lowess_fit_regression, n_draws = pdays),
+            predicted_value = y_hat_mean + error) %>%
     as.data.frame
 
   output <- predicted_values %>%
@@ -154,10 +165,17 @@ regressAR <- function(vec,
                         method = method,
                         vec = vec,
                         x = x,
+                        rhat_method = rhat_method,
                         predicted = predicted_values,
                         model_object = lm_object,
-                        return_stats = return_stat)
+                        return_stats = return_stat,
+                        buildAR_objects = NULL)
 
+  if( debug ) {
+
+    return_object[["buildAR_objects"]] <-  build_ar_object_list
+
+  }
   class(return_object) <- "regressAR"
 
   return(return_object)

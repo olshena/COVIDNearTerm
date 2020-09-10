@@ -9,6 +9,7 @@
 #' @param wsize Number of prior observations to use for averaging
 #' @param method Type of weighting to use
 #' @param seed Seed for random number generator
+#' @param rhat_method Method for calculating rhat, if "none", rhat = 1 and has no effect
 
 #' @return A list with the following components:
 #' @return wsize is the number of prior observations used for averaging
@@ -21,7 +22,12 @@
 #' @export
 #'
 
-buildAR <- function(vec, x = NULL, wsize, method = c("unweighted", "equal", "triangle"), seed = NULL ) {
+buildAR <- function(vec,
+                    x = NULL,
+                    wsize,
+                    method = c("unweighted", "equal", "triangle"),
+                    seed = NULL,
+                    rhat_method = c("none", "geometric", "arithmetic") ) {
 
   if( !is.null(seed) ){
     set.seed(seed)
@@ -40,6 +46,10 @@ buildAR <- function(vec, x = NULL, wsize, method = c("unweighted", "equal", "tri
     method <- method[1]
   }
 
+  if(length(rhat_method) > 1) {
+    rhat_method <- rhat_method[1]
+  }
+
   if( !(method %in% c("unweighted", "equal", "triangle") ) ) {
     stop("Method must be either unweighted, equal or triangle")
   }
@@ -56,14 +66,34 @@ buildAR <- function(vec, x = NULL, wsize, method = c("unweighted", "equal", "tri
     weights_phi <- rep(1, wsize) / wsize
   }
 
+  if ( rhat_method == "none" ) {
+    rhat <- 1
+  }
+
   n_vec <- length(vec)
+
+  if ( rhat_method == "geometric" ) {
+    r_i <- vec[-1] / x[-n_vec]
+    if( any(r_i <= 0 ) ){
+      cat("geometric mean specified for rhat_method, but r_i value(s) <= 0, using arithmetic mean\n")
+      rhat <- mean( r_i )
+    } else {
+      rhat <-  exp( sum( log( r_i ) ) / length( r_i ) )
+    }
+  }
+
+  if ( rhat_method == "arithmetic" ) {
+    r_i <- vec[-1] / x[-n_vec]
+    rhat <- mean( r_i )
+  }
+
 
   if( wsize > n_vec ){
     stop("wsize can't be larger than the length of vec")
   }
 
   ###Calculate initial phis
-  initphi <- c(1, vec[-1] / x[-n_vec] )
+  initphi <- c(1,  vec[-1] / x[-n_vec] / rhat )
   # initphi <- 1:n_vec
 
   ###Take weighted sum of initia phis to get final phi
@@ -114,6 +144,8 @@ buildAR <- function(vec, x = NULL, wsize, method = c("unweighted", "equal", "tri
                         method = method,
                         vec = vec,
                         x = x,
+                        rhat_method = rhat_method,
+                        rhat = rhat,
                         fits = fits,
                         errors = errors,
                         initphi = initphi,

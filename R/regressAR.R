@@ -158,9 +158,6 @@ regressAR <- function(vec,
 
   }
 
-
-
-
   return_object <- list(wsize = wsize,
                         method = method,
                         vec = vec,
@@ -172,10 +169,10 @@ regressAR <- function(vec,
                         buildAR_objects = NULL)
 
   if( debug ) {
-
-    return_object[["buildAR_objects"]] <-  build_ar_object_list
-
+    return_object[["buildAR_objects"]] <- build_ar_object_list
+    return_object[["lowess_object"]] <- lowess_fit_regression
   }
+
   class(return_object) <- "regressAR"
 
   return(return_object)

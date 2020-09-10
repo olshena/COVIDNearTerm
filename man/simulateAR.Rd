@@ -13,7 +13,8 @@ simulateAR(
   nsim,
   skip = 0,
   seed = NULL,
-  output_type = "all"
+  output_type = "all",
+  debug = FALSE
 )
 }
 \arguments{
@@ -32,6 +33,8 @@ simulateAR(
 \item{seed}{Seed for random number generator}
 
 \item{output_type}{Type of output}
+
+\item{debug}{TRUE returns buildAR objects in addition to standard output}
 }
 \value{
 A data frame containing the specified output statistics for each sim

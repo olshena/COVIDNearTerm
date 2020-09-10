@@ -13,7 +13,13 @@
 #'
 #' @export
 #'
-predictAR <- function(buildAR_obj, pdays, nsim, skip=0, seed=NULL, output_type="max") {
+predictAR <- function(buildAR_obj,
+                      pdays,
+                      nsim,
+                      skip=0,
+                      seed=NULL,
+                      output_type="max",
+                      debug = FALSE) {
 
   if( class(buildAR_obj) != "buildAR") {
     stop("buildAR_obj must be a buildAR object" )
@@ -100,25 +106,35 @@ predictAR <- function(buildAR_obj, pdays, nsim, skip=0, seed=NULL, output_type="
     }
   }
   if(output_type == "max") {
-    return_object <- data.frame(max = apply(output, 1, max) )
-    return_object$rep <- 1:nsim
+    return_stat <- data.frame(max = apply(output, 1, max) )
+    return_stat$rep <- 1:nsim
   }
   if(output_type=="mean") {
-    return_object <- data.frame(mean = apply(output, 1, mean) )
-    return_object$rep <- 1:nsim
+    return_stat <- data.frame(mean = apply(output, 1, mean) )
+    return_stat$rep <- 1:nsim
   }
   if(output_type == "all" ) {
-    return_object <- data.frame( t( apply(output, 1, summary) ) )
-    names( return_object ) <- gsub("\\.|X", "", names( return_object ) )
-    names( return_object ) <- gsub("1st", "First", names( return_object ) )
-    names( return_object ) <- gsub("3rd", "Third", names( return_object ) )
-    return_object$rep <- 1:nsim
+    return_stat <- data.frame( t( apply(output, 1, summary) ) )
+    names( return_stat ) <- gsub("\\.|X", "", names( return_stat ) )
+    names( return_stat ) <- gsub("1st", "First", names( return_stat ) )
+    names( return_stat ) <- gsub("3rd", "Third", names( return_stat ) )
+    return_stat$rep <- 1:nsim
 
   }
   if(output_type == "predictions" ) {
-    return_object <- data.frame( t( output ) )
-    return_object$t <- 1:pdays
+    return_stat <- data.frame( t( output ) )
+    return_stat$t <- 1:pdays
+    return(return_stat)
 
   }
+
+  return_object <- list(pdays = pdays,
+                        nsim = nsim,
+                        skip = skip,
+                        phis = initphi,
+                        return_stat = return_stat)
+
+  class(return_object) <- "predictAR"
+
   return(return_object)
 }

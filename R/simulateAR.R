@@ -11,13 +11,22 @@
 #' @param skip Number of input values to skip
 #' @param seed Seed for random number generator
 #' @param output_type Type of output
+#' @param debug TRUE returns buildAR objects in addition to standard output
 
 #' @return A data frame containing the specified output statistics for each sim
 #'
 #' @export
 #'
 #'
-simulateAR <- function(vec, x = NULL, wsize, method = c("unweighted", "equal", "triangle"), pdays, nsim, skip  = 0, seed = NULL, output_type = "all"){
+simulateAR <- function(vec, x = NULL,
+                       wsize,
+                       method = c("unweighted", "equal", "triangle"),
+                       pdays,
+                       nsim,
+                       skip  = 0,
+                       seed = NULL,
+                       output_type = "all",
+                       debug = FALSE){
 
   build_ar_object <- buildAR(vec, x, wsize, method = method, seed = seed)
 
@@ -25,7 +34,20 @@ simulateAR <- function(vec, x = NULL, wsize, method = c("unweighted", "equal", "
                       pdays = pdays,
                       nsim = nsim,
                       skip = skip,
-                      output_type = output_type)
+                      output_type = output_type,
+                      debug = debug)
 
-  return( ar_out )
+  return_object <- list(predict_stats = ar_out$return_stat)
+
+  if( debug ) {
+
+    return_object <- list("predict_object" = ar_out,
+                          "buildAR_object" = build_ar_object)
+
+    class(return_object) <- "simulateAR"
+
+  } else {
+    return_object <- ar_out$return_stat
+  }
+  return( return_object )
 }

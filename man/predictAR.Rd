@@ -4,7 +4,15 @@
 \alias{predictAR}
 \title{Makes predictions using an autogregressive model from the buildAR function}
 \usage{
-predictAR(buildAR_obj, pdays, nsim, skip = 0, seed = NULL, output_type = "max")
+predictAR(
+  buildAR_obj,
+  pdays,
+  nsim,
+  skip = 0,
+  seed = NULL,
+  output_type = "max",
+  debug = FALSE
+)
 }
 \arguments{
 \item{buildAR_obj}{An object output from the buildAR function}

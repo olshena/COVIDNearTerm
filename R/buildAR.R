@@ -136,7 +136,7 @@ buildAR <- function(vec,
   }
   # }
   ###Fits of the data are phi times data, subtract last point because phi only at t-1
-  fits <- finalphi[-n_vec] * x[-n_vec]
+  fits <- finalphi[-n_vec] * x[-n_vec] * rhat
   ###Errors are data minus fits, subtract first point because it cannot be predicted
   errors <- vec[-1] - fits
 

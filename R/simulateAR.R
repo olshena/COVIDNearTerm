@@ -26,9 +26,14 @@ simulateAR <- function(vec, x = NULL,
                        skip  = 0,
                        seed = NULL,
                        output_type = "all",
+                       rhat_method = c("none", "geometric", "arithmetic"),
                        debug = FALSE){
 
-  build_ar_object <- buildAR(vec, x, wsize, method = method, seed = seed)
+  if(length(rhat_method) > 1) {
+    rhat_method <- rhat_method[1]
+  }
+
+  build_ar_object <- buildAR(vec, x, wsize, method = method, seed = seed, rhat_method = rhat_method)
 
   ar_out <- predictAR(buildAR_obj = build_ar_object,
                       pdays = pdays,
@@ -36,8 +41,6 @@ simulateAR <- function(vec, x = NULL,
                       skip = skip,
                       output_type = output_type,
                       debug = debug)
-
-  return_object <- list(predict_stats = ar_out$return_stat)
 
   if( debug ) {
 

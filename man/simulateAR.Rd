@@ -14,6 +14,7 @@ simulateAR(
   skip = 0,
   seed = NULL,
   output_type = "all",
+  rhat_method = c("none", "geometric", "arithmetic"),
   debug = FALSE
 )
 }

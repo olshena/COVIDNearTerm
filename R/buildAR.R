@@ -93,8 +93,9 @@ buildAR <- function(vec,
   }
 
   ###Calculate initial phis
-  initphi <- c(1,  vec[-1] / x[-n_vec] / rhat )
+  initphi <-  c(1,  (vec[-1] /  x[-n_vec] ) / rhat )
   # initphi <- 1:n_vec
+  # c(1,  (vec[-1] /  x[-n_vec] ) / rhat )
 
   ###Take weighted sum of initia phis to get final phi
   ###Fill in 1s as needed before estimating phis
@@ -136,7 +137,7 @@ buildAR <- function(vec,
   }
   # }
   ###Fits of the data are phi times data, subtract last point because phi only at t-1
-  fits <- finalphi[-n_vec] * x[-n_vec] * rhat
+  fits <- finalphi[-n_vec] * x[-n_vec] * rhat #changed this from multiplying by rhat to dividing by rhat
   ###Errors are data minus fits, subtract first point because it cannot be predicted
   errors <- vec[-1] - fits
 

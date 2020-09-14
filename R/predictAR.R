@@ -31,6 +31,7 @@ predictAR <- function(buildAR_obj,
   method <- buildAR_obj$method
   wsize <- buildAR_obj$wsize
 
+  rhat <- buildAR_obj$rhat
   n_vec <- length(buildAR_obj$vec)
   initphi <- buildAR_obj$initphi
   errors <- buildAR_obj$errors
@@ -72,23 +73,33 @@ predictAR <- function(buildAR_obj,
   ###Set up output
   # i <- 1
   # j <- 1
+  # j <- 2
+  if( debug ) {
+    debug_output <- expand.grid(sim = 1:nsim,
+                                day = 1:pdays,
+                                phi_index = 1:wsize,
+                                current_phi = NA,
+                                weighted_phi = NA,
+                                value = NA,
+                                error = NA,
+                                predicted = NA) %>%
+      arrange(sim, day, phi_index)
+  }
   output <- matrix(NA, nsim, pdays)
   for(i in 1:nsim) {
-    for(j in 1:pdays)
-    {
+    for(j in 1:pdays) {
       ###Need to treat the first day specially because already have phi estimate
       if(j==1) {
         indices <- ( n_vec - wsize + 1 ):n_vec
         current_phis <- initphi[indices]
         weighted_phi <- sum( weights_phi * current_phis )
-        current_vec <- buildAR_obj$vec[n_vec]
-        new_value <- weighted_phi * current_vec
+        current_vec <- buildAR_obj$x[n_vec] #buildAR_obj$vec[n_vec]
+        new_value <- weighted_phi * current_vec * rhat # added rhat product to match how buildAR generates predictions
         new_error <- addError( new_value, lowess_fit )
         output[i,1] <- round( new_value + new_error )
         old_value <- new_value
         old_error <- new_error
-      }
-      else {
+      } else {
         current_phis <- c( current_phis[ -to_remove ], rnorm(1, weighted_phi, sdphi) )
         weighted_phi <- sum( weights_phi * current_phis )
         new_value <- weighted_phi * old_value
@@ -103,6 +114,28 @@ predictAR <- function(buildAR_obj,
         to_remove <- 1
       }
 
+      if( debug ) {
+        # debug_output %>% head
+
+        debug_output[debug_output$sim == i &
+                       debug_output$day == j, "current_phi" ] <- current_phis
+
+        debug_output[debug_output$sim == i &
+                       debug_output$day == j, "current_vec" ] <- current_vec
+
+        debug_output[debug_output$sim == i &
+                       debug_output$day == j, "weighted_phi" ][1] <- weighted_phi
+
+        debug_output[debug_output$sim == i &
+                       debug_output$day == j, "value" ][1] <- new_value
+
+        debug_output[debug_output$sim == i &
+                       debug_output$day == j, "error" ][1] <- new_error
+
+        debug_output[debug_output$sim == i &
+                       debug_output$day == j, "predicted" ][1] <- new_value + new_error
+
+      }
     }
   }
   if(output_type == "max") {
@@ -124,8 +157,6 @@ predictAR <- function(buildAR_obj,
   if(output_type == "predictions" ) {
     return_stat <- data.frame( t( output ) )
     return_stat$t <- 1:pdays
-    return(return_stat)
-
   }
 
   return_object <- list(pdays = pdays,
@@ -135,6 +166,10 @@ predictAR <- function(buildAR_obj,
                         return_stat = return_stat)
 
   class(return_object) <- "predictAR"
+
+  if( debug ) {
+    return_object[["predict_debug_object"]] <- debug_output
+  }
 
   return(return_object)
 }

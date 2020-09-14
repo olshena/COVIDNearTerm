@@ -104,13 +104,27 @@ regressAR <- function(vec,
                                 pdays = pdays,
                                 nsim = nsim,
                                 skip = skip,
-                                output_type = "predictions")
+                                output_type = "predictions",
+                                debug = debug)
 
+  # combined debug info
+  if( debug ) {
+
+    debug_predicted_data <- map2_dfr(predict_ar_object_list, names(predict_ar_object_list), function(.predict_ar_object, .name){
+
+      .predict_ar_object$predict_debug_object %>%
+        mutate(variable = .name)
+
+    }) %>%
+      select(variable, everything() ) %>%
+      arrange(variable, sim, day, phi_index)
+
+  }
 
   #combine predictions into a data frame
   predicted_data <- map2_dfr(predict_ar_object_list, names(predict_ar_object_list), function(.predict_ar_object, .name){
 
-    .predict_ar_object %>%
+    .predict_ar_object$return_stat %>%
       melt(id.var = "t") %>%
       mutate(pred_set = as.numeric( gsub("X", "", variable) ),
              variable = .name)
@@ -141,7 +155,7 @@ regressAR <- function(vec,
     return_stat$rep <- 1:nsim
   }
   if(output_type == "min") {
-    return_stat <- data.frame(min = apply(output, 1, max) )
+    return_stat <- data.frame(min = apply(output, 1, min) )
     return_stat$rep <- 1:nsim
   }
   if(output_type=="mean") {
@@ -169,8 +183,9 @@ regressAR <- function(vec,
                         buildAR_objects = NULL)
 
   if( debug ) {
-    return_object[["buildAR_objects"]] <- build_ar_object_list
-    return_object[["lowess_object"]] <- lowess_fit_regression
+    return_object[["debug_buildAR"]] <- build_ar_object_list
+    return_object[["debug_lowess_object"]] <- lowess_fit_regression
+    return_object[["debug_predictAR"]] <- debug_predicted_data
   }
 
   class(return_object) <- "regressAR"

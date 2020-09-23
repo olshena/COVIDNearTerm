@@ -20,7 +20,7 @@ regressAR(
 )
 }
 \arguments{
-\item{vec}{A vector of numeric data}
+\item{vec}{A vector of numeric data, will also be include as a default predictor}
 
 \item{x}{A data frame containing covariates with which to generate predictive model, if unspecified, defaults to vec}
 

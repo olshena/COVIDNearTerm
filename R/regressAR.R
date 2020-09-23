@@ -3,7 +3,7 @@
 #' Need to fill in description data
 #'
 #'
-#' @param vec A vector of numeric data
+#' @param vec A vector of numeric data, will also be include as a default predictor
 #' @param x A data frame containing covariates with which to generate predictive model, if unspecified, defaults to vec
 #' @param output_type A string indicating which outcome measure should be predicted. Must be one of Min, FirstQu, Median, Mean, ThirdQu, or Max
 #' @param wsize Number of prior observations to use for averaging
@@ -42,17 +42,19 @@ regressAR <- function(vec,
     set.seed(seed)
   }
 
-  if( is.null(x) ) {
-    x = data.frame(default = vec)
-  }
-
-  if( class(x) != "data.frame") {
+  if( class(x) != "data.frame" & !is.null(x) ) {
     stop("if specified, x must be a data frame")
   }
 
-  if( nrow(x) != length(vec) ) {
-    stop("if specified, x must be the same length as vec")
+  if( is.null(x) ) {
+    x_names <- NULL
+  } else {
+    x_names <- names(x)
   }
+
+  # if( nrow(x) != length(vec) ) {
+  #   stop("if specified, x must be the same length as vec")
+  # }
 
   if( !(output_type %in% c("min", "max", "mean", "all") ) ) {
     stop("output_type not valid, must be one of min, max, mean, or all")
@@ -62,20 +64,18 @@ regressAR <- function(vec,
     rhat_method <- rhat_method[1]
   }
 
-  x_names <- names(x)
-  n_predictors <- ncol(x)
+  n_predictors <- length(x_names)
   n_vec <- length(vec)
 
-  # build ar object for individual variables
-  build_ar_object_list <- map(x,
-                              buildAR,
-                              vec = vec,
-                              wsize = wsize,
-                              method = method,
-                              rhat_method = rhat_method)
+  # build ar object for vec
+  build_ar_object_list_y <- map(list(y_hat = vec),
+                                buildAR,
+                                vec = vec,
+                                wsize = wsize,
+                                method = method,
+                                rhat_method = rhat_method)
 
-  # fit regression model on buildAR variables
-  model_data <- map2_dfr(build_ar_object_list, names(build_ar_object_list), function(.build_ar_object, .name, .vec){
+  model_data <- map2_dfr(build_ar_object_list_y, names(build_ar_object_list_y), function(.build_ar_object, .name, .vec){
 
     data.frame( variable = .name,
                 t = 1:(n_vec - 1),
@@ -84,9 +84,37 @@ regressAR <- function(vec,
   }, .vec = vec) %>%
     dcast(t + vec ~ variable, value.var = "fits")
 
+  # build data frame for fitting regression model on buildAR variables
+  if( !is.null(x) ) {
+    build_ar_object_list_x <- map(x,
+                                  buildAR,
+                                  # vec = vec,
+                                  wsize = wsize,
+                                  method = method,
+                                  rhat_method = rhat_method)
+
+    model_data_x <- map2_dfr(build_ar_object_list_x, names(build_ar_object_list_x), function(.build_ar_object, .name, .vec){
+
+      data.frame( variable = .name,
+                  t = 1:(n_vec - 1),
+                  fits = .build_ar_object$x[-1])
+    }, .vec = vec) %>%
+      dcast(t  ~ variable, value.var = "fits")
+
+    model_data <- model_data %>%
+      merge(y = model_data_x,
+            by = "t")
+  }
+
+
   if( is.null( regression_weights ) ) {
+
+    cov_correlation <- model_data[ , names(x)] %>%
+      # mutate( vec = vec) %>%
+      cor
+
     # model vec ~ fits
-    variable_string <- paste0(names(x), collapse = " + ")
+    variable_string <- paste0( c("y_hat", names(x) ), collapse = " + ")
 
     model_formula <- as.formula( paste0( "vec ~ ", variable_string, " - 1" ) )
 
@@ -96,6 +124,13 @@ regressAR <- function(vec,
     errors_regression <- residuals(lm_object)
     lowess_fit_regression <- lowess(vec[-1], errors_regression^2)
 
+  }
+
+
+  if( !is.null(x) ) {
+    build_ar_object_list <- c(build_ar_object_list_y, build_ar_object_list_x)
+  } else {
+    build_ar_object_list <- build_ar_object_list_y
   }
 
   # make predictions on individual variables
@@ -133,15 +168,25 @@ regressAR <- function(vec,
     dcast(pred_set + t ~ variable) %>%
     arrange(pred_set, t)
 
-  # generate regression predicted values
-  predicted_data$y_hat_mean = predict(object = lm_object, predicted_data)
+  estimated_effect_names <- lm_object %>% summary %>% coefficients %>% rownames
+  missing_estimates <- setdiff(c("y_hat", names(x) ), estimated_effect_names)
 
-  names(predicted_data)[which( names( predicted_data ) %in% x_names ) ] <- paste0("y_", x_names)
+  if( length( missing_estimates ) > 0 ) {
+
+    cov_correlation
+    warning(paste0("The following covariates were not estimable in the regression model: ", paste0(missing_estimates, collapse = ", "), "\n",
+               "See debug data for more info.\n") )
+
+  }
+  # generate regression predicted values
+  predicted_data$z_hat_mean = predict(object = lm_object, predicted_data)
+
+  names(predicted_data)[which( names( predicted_data ) %in% x_names ) ] <- paste0(x_names, "_hat")
 
   predicted_values <- predicted_data %>%
     group_by(pred_set) %>%
-    mutate( error = addError(y_hat_mean, lowess_fit_regression, n_draws = pdays),
-            predicted_value = y_hat_mean + error) %>%
+    mutate( error = addError(z_hat_mean, lowess_fit_regression, n_draws = pdays),
+            predicted_value = z_hat_mean + error) %>%
     as.data.frame
 
   output <- predicted_values %>%
@@ -186,6 +231,8 @@ regressAR <- function(vec,
     return_object[["debug_buildAR"]] <- build_ar_object_list
     return_object[["debug_lowess_object"]] <- lowess_fit_regression
     return_object[["debug_predictAR"]] <- debug_predicted_data
+    return_object[["debug_regression_model"]] <- lm_object
+    return_object[["debug_correlations"]] <- cov_correlation
   }
 
   class(return_object) <- "regressAR"

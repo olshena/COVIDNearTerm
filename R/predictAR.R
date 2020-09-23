@@ -79,6 +79,7 @@ predictAR <- function(buildAR_obj,
                                 day = 1:pdays,
                                 phi_index = 1:wsize,
                                 current_phi = NA,
+                                rhat = rhat,
                                 weighted_phi = NA,
                                 value = NA,
                                 error = NA,
@@ -92,17 +93,17 @@ predictAR <- function(buildAR_obj,
       if(j==1) {
         indices <- ( n_vec - wsize + 1 ):n_vec
         current_phis <- initphi[indices]
-        weighted_phi <- sum( weights_phi * current_phis )
+        weighted_phi <- sum( weights_phi * current_phis ) * rhat
         current_vec <- buildAR_obj$x[n_vec] #buildAR_obj$vec[n_vec]
-        new_value <- weighted_phi * current_vec / rhat# added rhat product to match how buildAR generates predictions
+        new_value <- weighted_phi * current_vec #* rhat# added rhat product to match how buildAR generates predictions
         new_error <- addError( new_value, lowess_fit )
         output[i,1] <- round( new_value + new_error )
         old_value <- new_value
         old_error <- new_error
       } else {
         current_phis <- c( current_phis[ -to_remove ], rnorm(1, weighted_phi, sdphi) )
-        weighted_phi <- sum( weights_phi * current_phis )
-        new_value <- weighted_phi * old_value / rhat
+        weighted_phi <- sum( weights_phi * current_phis ) * rhat
+        new_value <- weighted_phi * old_value #* rhat
         new_error <- old_error + addError( new_value, lowess_fit )
         output[i,j] <- round( new_value + new_error )
         old_value <- new_value

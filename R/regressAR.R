@@ -109,10 +109,13 @@ regressAR <- function(vec,
 
   if( is.null( regression_weights ) ) {
 
+    if( length( names(x) ) > 1 ) {
     cov_correlation <- model_data[ , names(x)] %>%
       # mutate( vec = vec) %>%
       cor
-
+    } else {
+      cov_correlation = "Not enough covariates for a correlation."
+    }
     # model vec ~ fits
     variable_string <- paste0( c("y_hat", names(x) ), collapse = " + ")
 

@@ -19,4 +19,7 @@ Imports:
     pracma (>= 2.2.9),
     dplyr (>= 1.0.0),
     purrr (>= 0.3.4),
-    reshape2 (>= 1.4.4)
+    reshape2 (>= 1.4.4),
+    lubridate (>= 1.7.8)
+Depends: 
+    R (>= 2.10)

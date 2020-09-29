@@ -33,6 +33,9 @@ buildAR <- function(vec,
     set.seed(seed)
   }
 
+  if( any(vec == 0)) {
+    stop("vec can not have zero-values")
+  }
   if( is.null(x) ) {
     x <- vec
   }
@@ -73,10 +76,11 @@ buildAR <- function(vec,
   n_vec <- length(vec)
 
   if ( rhat_method == "geometric" ) {
+
     r_i <- vec[-1] / x[-n_vec]
     if( any(r_i <= 0 ) ){
       cat("geometric mean specified for rhat_method, but r_i value(s) <= 0, using arithmetic mean\n")
-      rhat <- mean( r_i )
+      rhat <- mean( r_i, na.rm = TRUE )
     } else {
       rhat <-  exp( sum( log( r_i ) ) / length( r_i ) )
     }

@@ -56,6 +56,20 @@ regressARLag <- function(vec,
   } else {
     x_names <- x %>% select( -(!!!index_colname) ) %>% names
 
+    # calculate minimum number of predictions for x variables
+    min_pdays_x <- merge(x = vec,
+                       y = x,
+                       by = index_colname,
+                       all = TRUE) %>%
+      map_dfr( function(var_data) {
+
+        sum(is.na(var_data))
+
+      }) %>%
+      select( all_of(x_names) ) %>% unlist
+
+    min_pdays <- c(pdays, min_pdays_x + pdays)
+
     if( is.null(x_lag) ) {
       x_lag <- rep(0, (ncol(x) - 1) )
     } else {
@@ -120,9 +134,7 @@ regressARLag <- function(vec,
                         val = .x_data) %>%
        filter(!is.na(val)) %>%
        select(val)
-
-     names(.tor)[1] <- .x_name
-
+     names(.tor) <- NULL
      .tor %>% unlist
 
     }, x_dates)
@@ -134,7 +146,7 @@ regressARLag <- function(vec,
         filter(!is.na(val)) %>%
         select(date)
 
-
+      names(.tor) <- NULL
       .tor %>% unlist
 
     }, x_dates)
@@ -217,6 +229,19 @@ regressARLag <- function(vec,
                                 output_type = "predictions",
                                 debug = debug)
 
+  # make predictions on individual variables
+
+  predict_ar_object_list <- map2(build_ar_object_list, min_pdays, function(.build_ar_object, .pday, ...) {
+
+    predictAR(.build_ar_object,
+              pdays = .pday,
+              nsim = nsim,
+              skip = skip,
+              output_type = "predictions",
+              debug = debug)
+
+  } )
+
   # combined debug info
   if( debug ) {
 
@@ -244,7 +269,7 @@ regressARLag <- function(vec,
     mutate(t = t + predict_start_date_y) %>%
     melt(id.var = "t") %>%
     mutate(pred_set = as.numeric( gsub("X", "", variable) ),
-           variable = .name) %>%
+           variable = y_name) %>%
     dcast(pred_set + t ~ variable) %>%
     arrange(pred_set, t)
 
@@ -262,7 +287,7 @@ regressARLag <- function(vec,
     predicted_data_x <- pmap_dfr(predict_model_args_x, function(.predict_ar_object, .name, .predict_start_date, .lag){
 
       .predict_ar_object$return_stat %>%
-        mutate(t = t + .predict_start_date) %>%
+        mutate(t = t + .predict_start_date ) %>%
         melt(id.var = c("t") ) %>%
         mutate(pred_set = as.numeric( gsub("X", "", variable) ),
                variable = .name) %>%

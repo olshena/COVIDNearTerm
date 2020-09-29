@@ -23,6 +23,7 @@
 #' @import dplyr
 #' @import purrr
 #' @import reshape2
+#' @import lubridate
 #'
 #' @export
 #'

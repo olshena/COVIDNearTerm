@@ -32,7 +32,7 @@ regressARLag <- function(vec,
                       x = NULL,
                       x_lag = NULL,
                       index_colname = "date",
-                      output_type = "Max",
+                      output_type = "max",
                       wsize,
                       method = c("unweighted", "equal", "triangle"),
                       pdays,
@@ -83,11 +83,6 @@ regressARLag <- function(vec,
     stop("if x is not specified, x_lag should not be specified")
   }
 
-
-  # if( nrow(x) != length(vec) ) {
-  #   stop("if specified, x must be the same length as vec")
-  # }
-
   if( !(output_type %in% c("min", "max", "mean", "all") ) ) {
     stop("output_type not valid, must be one of min, max, mean, or all")
   }
@@ -95,6 +90,9 @@ regressARLag <- function(vec,
   if(length(rhat_method) > 1) {
     rhat_method <- rhat_method[1]
   }
+
+  #reorder vec so that date is the first column
+  vec <- vec %>% select( (!!!index_colname), everything() )
 
   n_predictors <- x_names
   n_vec <- nrow(vec)

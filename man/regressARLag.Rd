@@ -9,7 +9,7 @@ regressARLag(
   x = NULL,
   x_lag = NULL,
   index_colname = "date",
-  output_type = "Max",
+  output_type = "max",
   wsize,
   method = c("unweighted", "equal", "triangle"),
   pdays,

@@ -7,7 +7,7 @@
 regressAR(
   vec,
   x = NULL,
-  output_type = "Max",
+  output_type = "max",
   wsize,
   method = c("unweighted", "equal", "triangle"),
   pdays,

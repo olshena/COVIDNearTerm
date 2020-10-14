@@ -15,6 +15,7 @@ simulateAR(
   seed = NULL,
   output_type = "all",
   rhat_method = c("none", "geometric", "arithmetic"),
+  lambda = 0,
   debug = FALSE
 )
 }
@@ -34,6 +35,9 @@ simulateAR(
 \item{seed}{Seed for random number generator}
 
 \item{output_type}{Type of output}
+
+\item{lambda}{Shrinkage parameter, if not specified, default is 0 which produces no shrinkage. If an array is specified, all values in teh array
+are evaluated and the optimal lambda is chosen based on residual sum of squares. Values should be between 0 and 1 inclusive.}
 
 \item{debug}{TRUE returns buildAR objects in addition to standard output}
 }

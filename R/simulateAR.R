@@ -11,6 +11,8 @@
 #' @param skip Number of input values to skip
 #' @param seed Seed for random number generator
 #' @param output_type Type of output
+#' @param lambda Shrinkage parameter, if not specified, default is 0 which produces no shrinkage. If an array is specified, all values in teh array
+#' are evaluated and the optimal lambda is chosen based on residual sum of squares. Values should be between 0 and 1 inclusive.
 #' @param debug TRUE returns buildAR objects in addition to standard output
 
 #' @return A data frame containing the specified output statistics for each sim
@@ -27,13 +29,22 @@ simulateAR <- function(vec, x = NULL,
                        seed = NULL,
                        output_type = "all",
                        rhat_method = c("none", "geometric", "arithmetic"),
+                       lambda = 0,
                        debug = FALSE){
 
   if(length(rhat_method) > 1) {
     rhat_method <- rhat_method[1]
   }
 
-  build_ar_object <- buildAR(vec, x, wsize, method = method, seed = seed, rhat_method = rhat_method)
+  if( !is.numeric(lambda) ) {
+    stop("lambda must be numeric")
+  }
+
+  if( any(abs(lambda) > 1 ) ) {
+    stop("lambda must be between 0 and 1")
+  }
+
+  build_ar_object <- buildAR(vec, x, wsize, method = method, seed = seed, rhat_method = rhat_method, lambda = lambda)
 
   ar_out <- predictAR(buildAR_obj = build_ar_object,
                       pdays = pdays,
@@ -44,7 +55,8 @@ simulateAR <- function(vec, x = NULL,
 
   if( debug ) {
 
-    return_object <- list("predict_object" = ar_out,
+    return_object <- list("return_stat" = ar_out$return_stat,
+                          "predict_object" = ar_out,
                           "buildAR_object" = build_ar_object)
 
     class(return_object) <- "simulateAR"

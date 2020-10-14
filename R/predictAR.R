@@ -37,6 +37,8 @@ predictAR <- function(buildAR_obj,
   errors <- buildAR_obj$errors
   diff_phis <- initphi[-1] - initphi[-n_vec]
 
+  lambda <- buildAR_obj$lambda
+
   ###Adding variable dat that will be used in lowess of error, dropping first point since no prediction
   dat <- buildAR_obj$vec[-1]
 
@@ -81,6 +83,7 @@ predictAR <- function(buildAR_obj,
                                 current_phi = NA,
                                 rhat = rhat,
                                 weighted_phi = NA,
+                                phi_s = NA,
                                 value = NA,
                                 error = NA,
                                 predicted = NA) %>%
@@ -94,8 +97,9 @@ predictAR <- function(buildAR_obj,
         indices <- ( n_vec - wsize + 1 ):n_vec
         current_phis <- initphi[indices]
         weighted_phi <- sum( weights_phi * current_phis ) * rhat
+        phi_s <- lambda + ( 1 - lambda ) * weighted_phi
         current_vec <- buildAR_obj$x[n_vec] #buildAR_obj$vec[n_vec]
-        new_value <- weighted_phi * current_vec #* rhat# added rhat product to match how buildAR generates predictions
+        new_value <- phi_s * current_vec #* rhat# added rhat product to match how buildAR generates predictions
         new_error <- addError( new_value, lowess_fit )
         output[i,1] <- round( new_value + new_error )
         old_value <- new_value
@@ -103,7 +107,8 @@ predictAR <- function(buildAR_obj,
       } else {
         current_phis <- c( current_phis[ -to_remove ], rnorm(1, weighted_phi, sdphi) )
         weighted_phi <- sum( weights_phi * current_phis ) * rhat
-        new_value <- weighted_phi * old_value #* rhat
+        phi_s <- lambda + ( 1 - lambda ) * weighted_phi
+        new_value <- phi_s * old_value #* rhat
         new_error <- old_error + addError( new_value, lowess_fit )
         output[i,j] <- round( new_value + new_error )
         old_value <- new_value
@@ -126,6 +131,9 @@ predictAR <- function(buildAR_obj,
 
         debug_output[debug_output$sim == i &
                        debug_output$day == j, "weighted_phi" ][1] <- weighted_phi
+
+        debug_output[debug_output$sim == i &
+                       debug_output$day == j, "phi_s" ][1] <- phi_s
 
         debug_output[debug_output$sim == i &
                        debug_output$day == j, "value" ][1] <- new_value

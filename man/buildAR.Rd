@@ -10,7 +10,8 @@ buildAR(
   wsize,
   method = c("unweighted", "equal", "triangle"),
   seed = NULL,
-  rhat_method = c("none", "geometric", "arithmetic")
+  rhat_method = c("none", "geometric", "arithmetic"),
+  lambda = 0
 )
 }
 \arguments{
@@ -25,6 +26,9 @@ buildAR(
 \item{seed}{Seed for random number generator}
 
 \item{rhat_method}{Method for calculating rhat, if "none", rhat = 1 and has no effect}
+
+\item{lambda}{Shrinkage parameter, if not specified, default is 0 which produces no shrinkage. If an array is specified, all values in teh array
+are evaluated and the optimal lambda is chosen based on residual sum of squares. Values should be between 0 and 1 inclusive.}
 }
 \value{
 A list with the following components:

@@ -10,6 +10,8 @@
 #' @param method Type of weighting to use
 #' @param seed Seed for random number generator
 #' @param rhat_method Method for calculating rhat, if "none", rhat = 1 and has no effect
+#' @param lambda Shrinkage parameter, if not specified, default is 0 which produces no shrinkage. If an array is specified, all values in teh array
+#' are evaluated and the optimal lambda is chosen based on residual sum of squares. Values should be between 0 and 1 inclusive.
 
 #' @return A list with the following components:
 #' @return wsize is the number of prior observations used for averaging
@@ -27,7 +29,8 @@ buildAR <- function(vec,
                     wsize,
                     method = c("unweighted", "equal", "triangle"),
                     seed = NULL,
-                    rhat_method = c("none", "geometric", "arithmetic") ) {
+                    rhat_method = c("none", "geometric", "arithmetic"),
+                    lambda = 0) {
 
   if( !is.null(seed) ){
     set.seed(seed)
@@ -91,72 +94,103 @@ buildAR <- function(vec,
     rhat <- mean( r_i )
   }
 
-
   if( wsize > n_vec ){
     stop("wsize can't be larger than the length of vec")
   }
 
+
+  if( !is.numeric(lambda) ) {
+    stop("lambda must be numeric")
+  }
+
+  if( any(abs(lambda) > 1 ) ) {
+    stop("lambda must be between 0 and 1")
+  }
+
   ###Calculate initial phis
   initphi <-  c(1,  (vec[-1] /  x[-n_vec] ) / rhat )
-  # initphi <- 1:n_vec
-  # c(1,  (vec[-1] /  x[-n_vec] ) / rhat )
 
   ###Take weighted sum of initia phis to get final phi
   ###Fill in 1s as needed before estimating phis
   finalphi <- rep(NA,n_vec)
 
-  # if( method == "unweighted" ) {
-  #   for(i in 1:n_vec) {
-  #     if(i == 1) {
-  #       to_remove <- 1
-  #     } else {
-  #       #determine which random day to remove
-  #       to_remove <- sample(x = wsize, size = 1)
-  #     }
-  #
-  #     if(i < wsize) {
-  #       to_remove <- 1
-  #       current_data <- c( rep(1, wsize - i), initphi[1:i] )
-  #     } else {
-  #       to_remove <- sample(x = wsize, size = 1)
-  #       current_data <- c(current_data, initphi[i])
-  #     }
-  #     # cat("phi calc data\n")
-  #     # print(current_data)
-  #     finalphi[i] <- sum(weights_phi * current_data)
-  #
-  #     # cat("Removing", current_data[ to_remove ], "\n")
-  #     current_data <- current_data[ -to_remove ]
-  #     # print(current_data)
-  #
-  #   }
-  # } else {
-  for(i in 1:n_vec) {
-    if(i < wsize) {
-      new_data <- c( rep(1, wsize - i), initphi[1:i] )
-    } else {
-      new_data <- initphi[ ( i - wsize + 1 ):i]
+  if( length(lambda) == 1 ) {
+
+    for(i in 1:n_vec) {
+      if(i < wsize) {
+        new_data <- c( rep(1, wsize - i), initphi[1:i] )
+      } else {
+        new_data <- initphi[ ( i - wsize + 1 ):i]
+      }
+
+      finalphi[i] <- sum(weights_phi * new_data)
     }
-    finalphi[i] <- sum(weights_phi * new_data)
+
+    phi_s <- (lambda + (1 - lambda) * finalphi[-n_vec] )
+
+    ###Fits of the data are phi times data, subtract last point because phi only at t-1
+    fits <- phi_s *
+      x[-n_vec] *
+      rhat
+
+    ###Errors are data minus fits, subtract first point because it cannot be predicted
+    errors <- vec[-1] - fits
+
+    return_object <- list(wsize = wsize,
+                          method = method,
+                          vec = vec,
+                          x = x,
+                          rhat_method = rhat_method,
+                          rhat = rhat,
+                          lambda = lambda,
+                          fits = fits,
+                          errors = errors,
+                          initphi = initphi,
+                          finalphi = finalphi,
+                          phi_s = phi_s)
+
+    class(return_object) <- "buildAR"
+
+    return(return_object)
+
   }
-  # }
-  ###Fits of the data are phi times data, subtract last point because phi only at t-1
-  fits <- finalphi[-n_vec] * x[-n_vec] * rhat #changed this from multiplying by rhat to dividing by rhat
-  ###Errors are data minus fits, subtract first point because it cannot be predicted
-  errors <- vec[-1] - fits
 
-  return_object <- list(wsize = wsize,
-                        method = method,
-                        vec = vec,
-                        x = x,
-                        rhat_method = rhat_method,
-                        rhat = rhat,
-                        fits = fits,
-                        errors = errors,
-                        initphi = initphi,
-                        finalphi = finalphi)
+  if( length( lambda ) > 1 ) {
 
-  class(return_object) <- "buildAR"
+    names(lambda) <- lambda
 
-  return(return_object)
+    buildAR_objects <- purrr:::map(lambda, function(.lambda, .vec, .x, .wsize, .method, .rhat_method) {
+
+      # print(.lambda)
+      buildAR(vec = .vec,
+              x = .x,
+              wsize = .wsize,
+              method = .method,
+              rhat_method = .rhat_method,
+              lambda = .lambda)
+
+    }, vec, x, wsize, method, rhat_method)
+
+    SSRs <- purrr:::map_dfr(buildAR_objects, function(.buildAR_object) {
+
+      data.frame(SSR = sum( .buildAR_object$error^2  ) ,
+                 lambda = .buildAR_object$lambda)
+
+    })
+
+    lambda_optimal <- SSRs %>%
+      arrange(SSR) %>%
+      head(1) %>%
+      select(lambda) %>%
+      unlist %>%
+      paste0
+
+    return_object <- buildAR_objects[[lambda_optimal]]
+
+    return_object$SSR <- SSRs
+
+    return(return_object)
+
+  }
+
 }

@@ -43,8 +43,7 @@ predictAR <- function(buildAR_obj,
   dat <- buildAR_obj$vec[-1]
 
   ###Skip the first skip features in the vector
-  if( skip > 0 )
-  {
+  if( skip > 0 ) {
     dat <- dat[-(1:skip)]
     errors <- errors[-(1:skip)]
     diff_phis <- diff_phis[-(1:(skip-1))]
@@ -83,6 +82,7 @@ predictAR <- function(buildAR_obj,
                                 current_phi = NA,
                                 rhat = rhat,
                                 weighted_phi = NA,
+                                lambda = lambda,
                                 phi_s = NA,
                                 value = NA,
                                 error = NA,
@@ -149,23 +149,24 @@ predictAR <- function(buildAR_obj,
   }
   if(output_type == "max") {
     return_stat <- data.frame(max = apply(output, 1, max) )
-    return_stat$rep <- 1:nsim
+    # return_stat$rep <- 1:nsim
   }
   if(output_type=="mean") {
     return_stat <- data.frame(mean = apply(output, 1, mean) )
-    return_stat$rep <- 1:nsim
+    # return_stat$rep <- 1:nsim
   }
   if(output_type == "all" ) {
     return_stat <- data.frame( t( apply(output, 1, summary) ) )
     names( return_stat ) <- gsub("\\.|X", "", names( return_stat ) )
     names( return_stat ) <- gsub("1st", "First", names( return_stat ) )
     names( return_stat ) <- gsub("3rd", "Third", names( return_stat ) )
-    return_stat$rep <- 1:nsim
+    # return_stat$rep <- 1:nsim
 
   }
   if(output_type == "predictions" ) {
     return_stat <- data.frame( t( output ) )
     return_stat$t <- 1:pdays
+    return_stat <- return_stat %>% select(t, everything())
   }
 
   return_object <- list(pdays = pdays,

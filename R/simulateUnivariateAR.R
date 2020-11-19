@@ -22,7 +22,8 @@
 #' @export
 #'
 #'
-simulateUnivariateAR <- function(vec, x = NULL,
+simulateUnivariateAR <- function(vec,
+                                 x = NULL,
                                  wsize,
                                  method = c("unweighted", "equal", "triangle"),
                                  pdays,
@@ -37,6 +38,11 @@ simulateUnivariateAR <- function(vec, x = NULL,
 
   if(length(rhat_method) > 1) {
     rhat_method <- rhat_method[1]
+  }
+
+  if(is.null(x)) {
+    stop("x cannot be NULL")
+
   }
 
   if( !is.numeric(lambda) ) {
@@ -88,16 +94,16 @@ simulateUnivariateAR <- function(vec, x = NULL,
 
   grid_search <- FALSE
 
-  if(alpha == "c") {
+  if( length(alpha) > 1) {
 
-    C <- 1 / mean( x_phis_standardized - y_phis )
-    alpha_grid = seq(0, C, length.out = 50)
+    alpha_grid <- alpha
     grid_search <- TRUE
 
   } else {
-    if( length(alpha) > 1 ) {
+    if(  alpha == "c" ) {
 
-      alpha_grid <- alpha
+      C <- 1 / mean( x_phis_standardized - y_phis )
+      alpha_grid = seq(0, C, length.out = 50)
       grid_search <- TRUE
 
     }
@@ -105,12 +111,7 @@ simulateUnivariateAR <- function(vec, x = NULL,
 
   if( grid_search ){
 
-    # .alpha <- 0.3
-    # .y_phis <- y_phis
-    # .x_phis_standardized <- x_phis_standardized
-    # .y_obs <- y_obs
-
-    grid_alphas <- map_dfr(alpha, function(.alpha, .y_phis, .x_phis_standardized, .y_obs) {
+    grid_alphas <- map_dfr(alpha_grid, function(.alpha, .y_phis, .x_phis_standardized, .y_obs) {
 
       .alpha_pred <- .y_phis * head(.y_obs, -1) +
         .alpha * ( .x_phis_standardized - y_phis ) * head(.y_obs, -1)
@@ -124,7 +125,6 @@ simulateUnivariateAR <- function(vec, x = NULL,
       arrange(SSR_alpha)
 
     alpha <- grid_alphas$alpha[1]
-
   }
 
   #########################################################
@@ -181,7 +181,7 @@ simulateUnivariateAR <- function(vec, x = NULL,
 
 
   predict_data <- split(predict_data_sub, predict_data_sub$sim) %>%
-    map2_dfr(unique(predict_data$sim), function(.predict_sim, .sim, .alpha) {
+    map2_dfr(unique(predict_data_sub$sim), function(.predict_sim, .sim, .alpha) {
 
       .predict_sim  %>%
         mutate(sim = .sim,
@@ -229,19 +229,25 @@ simulateUnivariateAR <- function(vec, x = NULL,
 
   if( debug ) {
 
-    return_object <- list("return_stat" = ar_out$return_stat)
+    return_object <- list("return_stat" = return_stat)
 
     return_object[["build_object_y"]] <- build_ar_object_y
     return_object[["build_object_x"]] <- build_ar_object_x
     return_object[["predict_debug_object_y"]] <- ar_out_y
     return_object[["predict_debug_object_x"]] <- ar_out_x
-    return_object[["predict_info_matrix"]] <- predict_data
+    return_object[["predict_info_matrix"]] <-  as.data.frame(predict_data)
 
+
+    if(grid_search) {
+      return_object[["alpha_grid"]] <- grid_alphas
+    }
+
+    return_object[["alpha_used"]] <- alpha
 
     class(return_object) <- "simulateAR"
 
   } else {
-    return_object <- ar_out$return_stat
+    return_object <- return_stat
   }
   return( return_object )
 }

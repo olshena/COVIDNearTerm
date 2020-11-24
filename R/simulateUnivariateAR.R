@@ -90,7 +90,7 @@ simulateUnivariateAR <- function(vec,
   y_phis <- build_ar_object_y$phi_s
   x_phis <- build_ar_object_x$phi_s
 
-  x_phis_standardized <- (x_phis - mean( x_phis ) + mean( y_phis ) ) * ( sd( y_phis ) / sd( x_phis ) )
+  x_phis_standardized <- ( x_phis - mean( x_phis ) ) * ( sd( y_phis ) / sd( x_phis ) ) + mean( y_phis )
 
   grid_search <- FALSE
 
@@ -185,7 +185,7 @@ simulateUnivariateAR <- function(vec,
 
       .predict_sim  %>%
         mutate(sim = .sim,
-               phi_p_standardized = (phi_p - mean( phi_p ) + mean( phi_y ) ) * ( sd( phi_y ) / sd( phi_p ) ),
+               phi_p_standardized = ( phi_p - mean( phi_p ) ) * ( sd( phi_y ) / sd( phi_p ) ) + mean( phi_y ),
                f_phi = phi_p_standardized - phi_y,
                value = phi_y * y_t1 + .alpha * f_phi * y_t1)
      }, alpha)

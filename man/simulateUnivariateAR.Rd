@@ -17,6 +17,7 @@ simulateUnivariateAR(
   rhat_method = c("none", "geometric", "arithmetic"),
   lambda = 0,
   alpha = 0,
+  rolling_mean = 1,
   debug = FALSE
 )
 }
@@ -42,6 +43,8 @@ are evaluated and the optimal lambda is chosen based on residual sum of squares.
 
 \item{alpha}{Alpha parameter, if not specified, default is 0 which produces no shrinkage. If an array is specified, all values in the array
 are evaluated and the optimal alpha is chosen based on residual sum of squares. Values should be >=0.}
+
+\item{rolling_mean}{rolling mean window for x. Default is 1}
 
 \item{debug}{TRUE returns buildAR objects in addition to standard output}
 }

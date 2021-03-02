@@ -15,9 +15,16 @@
 #' are evaluated and the optimal lambda is chosen based on residual sum of squares. Values should be between 0 and 1 inclusive.
 #' @param alpha Alpha parameter, if not specified, default is 0 which produces no shrinkage. If an array is specified, all values in the array
 #' are evaluated and the optimal alpha is chosen based on residual sum of squares. Values should be >=0.
+#' @param rolling_mean rolling mean window for x. Default is 1
 #' @param debug TRUE returns buildAR objects in addition to standard output
 
 #' @return A data frame containing the specified output statistics for each sim
+#'
+#' @import dplyr
+#' @import purrr
+#' @import reshape2
+#' @import lubridate
+#' @import zoo
 #'
 #' @export
 #'
@@ -34,6 +41,7 @@ simulateUnivariateAR <- function(vec,
                                  rhat_method = c("none", "geometric", "arithmetic"),
                                  lambda = 0,
                                  alpha = 0,
+                                 rolling_mean = 1,
                                  debug = FALSE){
 
   if(length(rhat_method) > 1) {
@@ -43,6 +51,14 @@ simulateUnivariateAR <- function(vec,
   if(is.null(x)) {
     stop("x cannot be NULL")
 
+  }
+
+  if(rolling_mean < 1 | rolling_mean > length(x) ) {
+    stop(paste0("rolling mean must be at least 1 and no more than the length of x. specified rolling mean is ", rolling_mean) )
+  }
+
+  if( round(rolling_mean, 0) != rolling_mean ) {
+    stop(paste0("specified rolling mean, ", rolling_mean, ", is not an integer and should be") )
   }
 
   if( !is.numeric(lambda) ) {
@@ -64,10 +80,29 @@ simulateUnivariateAR <- function(vec,
   }
 
   #########################################################
+  # transform x using rolling mean
+  #########################################################
+  ### generate rolling means for first k values
+
+  if(rolling_mean != 1){
+    first_means <- map(1:(rolling_mean - 1), function(.k, .x) {
+
+      zoo::rollmean(x = .x[1:.k], k = .k, align = "right" )
+
+    }, x) %>% unlist
+
+    last_means <- zoo::rollmean(x = x, k = rolling_mean, align = "right" )
+
+    x <- c(first_means, last_means)
+  }
+  # x_rolling <- c(first_means, last_means)
+
+  #########################################################
   # build training models
   #########################################################
   build_ar_object_y <- buildAR(vec = vec, x = vec, wsize, method = method, seed = seed, rhat_method = rhat_method, lambda = lambda)
   build_ar_object_x <- buildAR(vec = x, x = x, wsize, method = method, seed = seed, rhat_method = rhat_method, lambda = lambda)
+  # build_ar_object_x_rolling <- buildAR(vec = x_rolling, x = x_rolling, wsize, method = method, seed = seed, rhat_method = rhat_method, lambda = lambda)
 
   ###Fit lowess for relationship between data and error so error is proportional to magnitude
   errors <- build_ar_object_y$errors
@@ -89,6 +124,7 @@ simulateUnivariateAR <- function(vec,
   y_obs <-  build_ar_object_y$vec
   y_phis <- build_ar_object_y$phi_s
   x_phis <- build_ar_object_x$phi_s
+  # x__rolling_phis <- build_ar_object_x_rolling$phi_s
 
   x_phis_standardized <- ( x_phis - mean( x_phis ) ) * ( sd( y_phis ) / sd( x_phis ) ) + mean( y_phis )
 
@@ -102,7 +138,8 @@ simulateUnivariateAR <- function(vec,
   } else {
     if(  alpha == "c" ) {
 
-      C <- 1 / mean( x_phis_standardized - y_phis )
+      # C <- 1 / mean( x_phis_standardized - y_phis )
+      C <- 1/50
       alpha_grid = seq(0, C, length.out = 50)
       grid_search <- TRUE
 
@@ -132,11 +169,11 @@ simulateUnivariateAR <- function(vec,
   #########################################################
 
   ar_out_y <- predictAR(buildAR_obj = build_ar_object_y,
-                       pdays = pdays,
-                       nsim = nsim,
-                       skip = skip,
-                       output_type = "predictions",
-                       debug = TRUE)
+                        pdays = pdays,
+                        nsim = nsim,
+                        skip = skip,
+                        output_type = "predictions",
+                        debug = TRUE)
 
   y_debug <- ar_out_y$predict_debug_object %>%
     filter(!is.na(predicted)) %>%
@@ -160,9 +197,20 @@ simulateUnivariateAR <- function(vec,
                         output_type = "predictions",
                         debug = TRUE)
 
+  # ar_out_x_rolling <- predictAR(buildAR_obj = build_ar_object_x_rolling,
+  #                       pdays = pdays,
+  #                       nsim = nsim,
+  #                       skip = skip,
+  #                       output_type = "predictions",
+  #                       debug = TRUE)
+
   x_debug <- ar_out_x$predict_debug_object %>%
     filter(!is.na(predicted)) %>%
     select(sim, day, phi_s, predicted, current_vec)
+
+  # x_rolling_debug <- ar_out_x$predict_debug_object %>%
+  #   filter(!is.na(predicted)) %>%
+  #   select(sim, day, phi_s, predicted, current_vec)
 
   predict_x <- split(x_debug, x_debug$sim) %>%
     map2_dfr(unique(x_debug$sim), function(.debug_sim, .sim) {
@@ -173,6 +221,16 @@ simulateUnivariateAR <- function(vec,
 
 
     })
+
+  # predict_x_rolling <- split(x_debug, x_debug$sim) %>%
+  #   map2_dfr(unique(x_debug$sim), function(.debug_sim, .sim) {
+  #
+  #     data.frame(sim = .sim,
+  #                day = .debug_sim$day,
+  #                phi_p = .debug_sim$phi_s)
+  #
+  #
+  #   })
 
   predict_data_sub <- predict_y %>%
     merge(y = predict_x,

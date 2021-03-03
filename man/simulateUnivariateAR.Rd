@@ -7,6 +7,7 @@
 simulateUnivariateAR(
   vec,
   x = NULL,
+  x_lag = 0,
   wsize,
   method = c("unweighted", "equal", "triangle"),
   pdays,
@@ -23,6 +24,10 @@ simulateUnivariateAR(
 }
 \arguments{
 \item{vec}{A vector of numeric data}
+
+\item{x}{A vector of numeric data, used to predict vec. Must be the same size as vec and indexed to vec}
+
+\item{x_lag}{An integer used to specify the number of observations x should be shifted. Vec will also be truncated on top by x_lag}
 
 \item{wsize}{Number of prior observations to use for averaging}
 
@@ -44,7 +49,7 @@ are evaluated and the optimal lambda is chosen based on residual sum of squares.
 \item{alpha}{Alpha parameter, if not specified, default is 0 which produces no shrinkage. If an array is specified, all values in the array
 are evaluated and the optimal alpha is chosen based on residual sum of squares. Values should be >=0.}
 
-\item{rolling_mean}{rolling mean window for x. Default is 1}
+\item{rolling_mean}{rolling mean window for x. Must be an integer less than length of x. Default is 1}
 
 \item{debug}{TRUE returns buildAR objects in addition to standard output}
 }

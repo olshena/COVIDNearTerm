@@ -4,6 +4,7 @@
 #'
 #'
 #' @param vec A vector of numeric data
+#' @param x A vector of numeric data, used to predict vec. If not specified, defaults to vec
 #' @param wsize Number of prior observations to use for averaging
 #' @param method Type of weighting to use
 #' @param pdays Number of days into the future to make predictions

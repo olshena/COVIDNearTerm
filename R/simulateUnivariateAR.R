@@ -4,6 +4,8 @@
 #'
 #'
 #' @param vec A vector of numeric data
+#' @param x A vector of numeric data, used to predict vec. Must be the same size as vec and indexed to vec
+#' @param x_lag An integer used to specify the number of observations x should be shifted. Vec will also be truncated on top by x_lag
 #' @param wsize Number of prior observations to use for averaging
 #' @param method Type of weighting to use
 #' @param pdays Number of days into the future to make predictions
@@ -15,7 +17,7 @@
 #' are evaluated and the optimal lambda is chosen based on residual sum of squares. Values should be between 0 and 1 inclusive.
 #' @param alpha Alpha parameter, if not specified, default is 0 which produces no shrinkage. If an array is specified, all values in the array
 #' are evaluated and the optimal alpha is chosen based on residual sum of squares. Values should be >=0.
-#' @param rolling_mean rolling mean window for x. Default is 1
+#' @param rolling_mean rolling mean window for x. Must be an integer less than length of x. Default is 1
 #' @param debug TRUE returns buildAR objects in addition to standard output
 
 #' @return A data frame containing the specified output statistics for each sim
@@ -31,6 +33,7 @@
 #'
 simulateUnivariateAR <- function(vec,
                                  x = NULL,
+                                 x_lag = 0,
                                  wsize,
                                  method = c("unweighted", "equal", "triangle"),
                                  pdays,
@@ -53,12 +56,20 @@ simulateUnivariateAR <- function(vec,
 
   }
 
-  if(rolling_mean < 1 | rolling_mean > length(x) ) {
-    stop(paste0("rolling mean must be at least 1 and no more than the length of x. specified rolling mean is ", rolling_mean) )
+  if(length(x) != length(vec)) {
+    stop(paste0("x length (", length(x), ") should be the same as vec length (", length(vec), ")") )
   }
 
-  if( round(rolling_mean, 0) != rolling_mean ) {
-    stop(paste0("specified rolling mean, ", rolling_mean, ", is not an integer and should be") )
+  if(rolling_mean < 1 | rolling_mean > (length(x) - x_lag) ) {
+    stop(paste0("rolling mean must be at least 1 and no more than the length of x - x_lag. specified rolling mean is ", rolling_mean) )
+  }
+
+  if( round(rolling_mean, 0) != rolling_mean | is.na(rolling_mean) ) {
+    stop(paste0("specified rolling_mean, ", rolling_mean, ", should be an integer") )
+  }
+
+  if( round(x_lag, 0) != x_lag | is.na(rolling_mean) ) {
+    stop(paste0("specified x_lag, ", x_lag, ", should be an integer") )
   }
 
   if( !is.numeric(lambda) ) {
@@ -78,6 +89,18 @@ simulateUnivariateAR <- function(vec,
       stop("alpha must be >= 0")
     }
   }
+
+  #########################################################
+  # chop x_lag entries from the bottom of x
+  # chop x_lag entries from the top of y
+  #########################################################
+  if( x_lag > 0 ) {
+    cat("shifting x by", x_lag, "\n")
+    x <- head(x, -x_lag)
+    cat("truncating vec by", x_lag, "\n")
+    vec <- tail(vec, -x_lag)
+  }
+
 
   #########################################################
   # transform x using rolling mean

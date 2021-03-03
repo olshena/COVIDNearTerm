@@ -22,6 +22,8 @@ simulateAR(
 \arguments{
 \item{vec}{A vector of numeric data}
 
+\item{x}{A vector of numeric data, used to predict vec. If not specified, defaults to vec}
+
 \item{wsize}{Number of prior observations to use for averaging}
 
 \item{method}{Type of weighting to use}

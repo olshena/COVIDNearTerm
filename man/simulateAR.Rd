@@ -7,15 +7,15 @@
 simulateAR(
   vec,
   x = NULL,
-  wsize,
-  method = c("unweighted", "equal", "triangle"),
-  pdays,
-  nsim,
+  wsize = 14,
+  method = c("equal", "unweighted", "triangle"),
+  pdays = 28,
+  nsim = 100,
   skip = 0,
   seed = NULL,
   output_type = "all",
   rhat_method = c("none", "geometric", "arithmetic"),
-  lambda = 0,
+  lambda = seq(0, 1, 0.05),
   debug = FALSE
 )
 }
@@ -24,21 +24,23 @@ simulateAR(
 
 \item{x}{A vector of numeric data, used to predict vec. If not specified, defaults to vec}
 
-\item{wsize}{Number of prior observations to use for averaging}
+\item{wsize}{Number of prior observations to use for averaging, default is 14}
 
-\item{method}{Type of weighting to use}
+\item{method}{Type of weighting to use, default is equal}
 
-\item{pdays}{Number of days into the future to make predictions}
+\item{pdays}{Number of days into the future to make predictions, default is 28}
 
-\item{nsim}{Number of simulations}
+\item{nsim}{Number of simulations, default is 100}
 
-\item{skip}{Number of input values to skip}
+\item{skip}{Number of input values to skip, default is 0}
 
 \item{seed}{Seed for random number generator}
 
-\item{output_type}{Type of output}
+\item{output_type}{Type of output, default is all}
 
-\item{lambda}{Shrinkage parameter, if not specified, default is 0 which produces no shrinkage. If an array is specified, all values in teh array
+\item{rhat_method}{Method for calculating rhat, if "none", rhat = 1 and has no effect}
+
+\item{lambda}{Shrinkage parameter, if not specified, default is a grid search from 0 to 1 by 0.05. A value of 0 produces no shrinkage. If an array is specified, all values in the array
 are evaluated and the optimal lambda is chosen based on residual sum of squares. Values should be between 0 and 1 inclusive.}
 
 \item{debug}{TRUE returns buildAR objects in addition to standard output}

@@ -8,11 +8,11 @@
 #' @param x_lag An array with an element for each non-date column in x, indicating the lag associated with that column
 #' @param index_colname An character indicating the name of the column that temporally indexes data, e.g. "date". This column should be yyyy/mm/dd format
 #' @param output_type A string indicating which outcome measure should be predicted. Must be one of Min, FirstQu, Median, Mean, ThirdQu, or Max
-#' @param wsize Number of prior observations to use for averaging
-#' @param method Type of weighting to use in individual prediction models
-#' @param pdays Number of days into the future to make predictions
-#' @param nsim  Number of simulations
-#' @param skip Number of input values to skip
+#' @param wsize Number of prior observations to use for averaging, default is 14
+#' @param method Type of weighting to use in individual prediction models, default is equal
+#' @param pdays Number of days into the future to make predictions, default is 28
+#' @param nsim  Number of simulations, default is 100
+#' @param skip Number of input values to skip, default is 0
 #' @param seed Seed for random number generator
 #' @param regression_weights An array specifying regression weights. Currently not implemented
 #' @param rhat_method Method for calculating rhat, if "none", rhat = 1 and has no effect
@@ -33,10 +33,10 @@ regressARLag <- function(vec,
                       x_lag = NULL,
                       index_colname = "date",
                       output_type = "max",
-                      wsize,
-                      method = c("unweighted", "equal", "triangle"),
-                      pdays,
-                      nsim,
+                      wsize = 14,
+                      method = c("equal", "unweighted", "triangle"),
+                      pdays = 28,
+                      nsim = 100,
                       skip = 0,
                       seed = NULL,
                       regression_weights = NULL,

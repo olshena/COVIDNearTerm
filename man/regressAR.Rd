@@ -8,10 +8,10 @@ regressAR(
   vec,
   x = NULL,
   output_type = "max",
-  wsize,
-  method = c("unweighted", "equal", "triangle"),
-  pdays,
-  nsim,
+  wsize = 14,
+  method = c("equal", "unweighted", "triangle"),
+  pdays = 28,
+  nsim = 100,
   skip = 0,
   seed = NULL,
   regression_weights = NULL,
@@ -26,15 +26,15 @@ regressAR(
 
 \item{output_type}{A string indicating which outcome measure should be predicted. Must be one of Min, FirstQu, Median, Mean, ThirdQu, or Max}
 
-\item{wsize}{Number of prior observations to use for averaging}
+\item{wsize}{Number of prior observations to use for averaging, default is 14}
 
-\item{method}{Type of weighting to use in individual prediction models}
+\item{method}{Type of weighting to use in individual prediction models, default is equal}
 
-\item{pdays}{Number of days into the future to make predictions}
+\item{pdays}{Number of days into the future to make predictions, default is 28}
 
-\item{nsim}{Number of simulations}
+\item{nsim}{Number of simulations, default is 100}
 
-\item{skip}{Number of input values to skip}
+\item{skip}{Number of input values to skip, default is 0}
 
 \item{seed}{Seed for random number generator}
 

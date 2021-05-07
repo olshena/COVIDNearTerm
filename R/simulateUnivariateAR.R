@@ -6,18 +6,19 @@
 #' @param vec A vector of numeric data
 #' @param x A vector of numeric data, used to predict vec. Must be the same size as vec and indexed to vec
 #' @param x_lag An integer used to specify the number of observations x should be shifted. Vec will also be truncated on top by x_lag
-#' @param wsize Number of prior observations to use for averaging
-#' @param method Type of weighting to use
-#' @param pdays Number of days into the future to make predictions
-#' @param nsim  Number of simulations
-#' @param skip Number of input values to skip
+#' @param wsize Number of prior observations to use for averaging, default is 14
+#' @param method Type of weighting to use, default is equal
+#' @param pdays Number of days into the future to make predictions, default is 28
+#' @param nsim  Number of simulations, default is 100
+#' @param skip Number of input values to skip, default is 0
 #' @param seed Seed for random number generator
-#' @param output_type Type of output
-#' @param lambda Shrinkage parameter, if not specified, default is 0 which produces no shrinkage. If an array is specified, all values in the array
+#' @param output_type Type of output, default is all
+#' @param rhat_method Method for calculating rhat, if "none", rhat = 1 and has no effect
+#' @param lambda Shrinkage parameter, if not specified, default is a grid search from 0 to 1 by 0.05. A value of 0 produces no shrinkage. If an array is specified, all values in the array
 #' are evaluated and the optimal lambda is chosen based on residual sum of squares. Values should be between 0 and 1 inclusive.
-#' @param alpha Alpha parameter, if not specified, default is 0 which produces no shrinkage. If an array is specified, all values in the array
+#' @param alpha Alpha parameter, if not specified, default is 0 which produces no scaling. If an array is specified, all values in the array
 #' are evaluated and the optimal alpha is chosen based on residual sum of squares. Values should be >=0.
-#' @param rolling_mean rolling mean window for x. Must be an integer less than length of x. Default is 1
+#' @param rolling_mean rolling mean window for x. Must be an integer less than length of x and at least 1. Default is 1
 #' @param debug TRUE returns buildAR objects in addition to standard output
 
 #' @return A data frame containing the specified output statistics for each sim
@@ -34,15 +35,15 @@
 simulateUnivariateAR <- function(vec,
                                  x = NULL,
                                  x_lag = 0,
-                                 wsize,
-                                 method = c("unweighted", "equal", "triangle"),
-                                 pdays,
-                                 nsim,
+                                 wsize = 14,
+                                 method = c("equal", "unweighted", "triangle"),
+                                 pdays = 28,
+                                 nsim = 100,
                                  skip  = 0,
                                  seed = NULL,
                                  output_type = "all",
                                  rhat_method = c("none", "geometric", "arithmetic"),
-                                 lambda = 0,
+                                 lambda = seq(0, 1, 0.05),
                                  alpha = 0,
                                  rolling_mean = 1,
                                  debug = FALSE){

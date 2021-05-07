@@ -8,7 +8,7 @@ buildAR(
   vec,
   x = NULL,
   wsize,
-  method = c("unweighted", "equal", "triangle"),
+  method = c("equal", "unweighted", "triangle"),
   seed = NULL,
   rhat_method = c("none", "geometric", "arithmetic"),
   lambda = 0

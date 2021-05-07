@@ -3,9 +3,9 @@
 #' Description text
 #'
 #' @param buildAR_obj An object output from the buildAR function
-#' @param pdays Number of days into the future to make predictions
-#' @param nsim  Number of simulations
-#' @param skip Number of input values to skip
+#' @param pdays Number of days into the future to make predictions, default is 28
+#' @param nsim  Number of simulations, default is 100
+#' @param skip Number of input values to skip, default is 0
 #' @param seed Seed for random number generator
 #' @param output_type Type of output to predict, currently max, mean, or all are valid
 
@@ -14,11 +14,11 @@
 #' @export
 #'
 predictAR <- function(buildAR_obj,
-                      pdays,
-                      nsim,
-                      skip=0,
-                      seed=NULL,
-                      output_type="max",
+                      pdays = 28,
+                      nsim = 100,
+                      skip = 0,
+                      seed = NULL,
+                      output_type = "all",
                       debug = FALSE) {
 
   if( class(buildAR_obj) != "buildAR") {

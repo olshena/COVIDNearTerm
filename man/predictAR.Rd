@@ -6,22 +6,22 @@
 \usage{
 predictAR(
   buildAR_obj,
-  pdays,
-  nsim,
+  pdays = 28,
+  nsim = 100,
   skip = 0,
   seed = NULL,
-  output_type = "max",
+  output_type = "all",
   debug = FALSE
 )
 }
 \arguments{
 \item{buildAR_obj}{An object output from the buildAR function}
 
-\item{pdays}{Number of days into the future to make predictions}
+\item{pdays}{Number of days into the future to make predictions, default is 28}
 
-\item{nsim}{Number of simulations}
+\item{nsim}{Number of simulations, default is 100}
 
-\item{skip}{Number of input values to skip}
+\item{skip}{Number of input values to skip, default is 0}
 
 \item{seed}{Seed for random number generator}
 

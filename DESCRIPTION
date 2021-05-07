@@ -1,15 +1,17 @@
 Package: COVIDNearTerm
 Title: Near Term Prediction of COVID-Related Population Metrics
-Version: 0.0021
+Version: 1.0
 Authors@R: 
-    person(given = "First",
-           family = "Last",
+    person(given = "Kristopher",
+           family = "Kapphahn",
            role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+           email = "kikapp@stanford.edu")
+    person(given = "Adam",
+           family = "Olshen",
+           role = c("aut", "cre"),
+           email = "adam.olshen@ucsf.edu")
 Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to
-    pick a license
+License: `use_mit_license()`
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

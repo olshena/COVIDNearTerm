@@ -17,7 +17,15 @@ addError <- function(xpred, lowess_obj, n_draws = 1)
   # duplicate warning from approx()
   lowess_obj_reduced <- as.list( unique( data.frame(lowess_obj) ) )
 
-  sd_dat <- sqrt( approx(lowess_obj_reduced, xout = xpred, rule = 2)$y)
+  est_var <- approx(lowess_obj_reduced, xout = xpred, rule = 2)$y
+
+  # if lowess est_var is negative, use smallest positive observed value
+  if( est_var < 0 ) {
+    est_var <-  min( lowess_obj_reduced$y[ lowess_obj_reduced$y > 0 ] )
+  }
+
+  sd_dat <- sqrt( est_var )
+
   rnorm(n_draws, 0, sd_dat)
 }
 

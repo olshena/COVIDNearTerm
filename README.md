@@ -4,7 +4,6 @@ CovidNearTerm is a bootstrap-based method based on an autoregressive model to es
 Our projections are based on the call simulateAR(vec,wsize=14,method="unweighted",pdays=28,nsim=10000,seed=12345,output_type="predictions",lambda=seq(0,1,0.05)) where
 
 vec-hospitalization data times series
-
 wsize-the number of days going into the kernel
 
 method-the type of kernel

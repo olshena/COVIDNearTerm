@@ -10,6 +10,6 @@ pdays-the number of days in the future to make predictions\
 nsim-the number of simulations\
 seed-the random seed\
 output_type-the format of the output\
-lambda-the choices for the shrinkage parameters\
+lambda-the choices for the shrinkage parameters
 
 A detailed explanation of the methdology is coming soon.

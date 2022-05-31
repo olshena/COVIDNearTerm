@@ -1,0 +1,115 @@
+---
+title: "fig1-vignette"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{fig1-vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(COVIDNearTerm)
+```
+
+
+The purpose of this vignette is to show how to make hospitalization predictions using the COVIDNearTerm method using the COVIDNearTerm library.  We will focus on recreatig a figure like Figure 1 in (ref paper).
+
+
+```{r eval = FALSE}
+install.packages('remotes')
+remotes::install_github(repo = 'olshena/COVIDNearTerm')
+library(COVIDNearTerm)
+```
+
+The county_hospitalizations contains 308 days worth of hospitalization data from six Bay Area counties starting on May 1, 2020. We will make predictions using the 150 days from Santa Clara County as training data.
+
+```{r}
+training_data <- county_hospitalizations$Santa.Clara[1:150]
+```
+
+We will build the model and make predictions using the same function, simulateAR
+
+The arguments are:
+y is the training data
+wsize is the number of prior days to estimate the current hospitalization trend
+method is how to weigh the wsize prior days of hospitalizations, choices are equal (default), unequal, and traingle
+lambda is the shrinkage parameter, default is 0 for no shrinkage, but it is good to make nonzero
+pdays is the number of days to predict
+seed is the seed for the random generator
+output_type is the type of output, a good choice is "predictions" for predictions
+nsim is the number of simulations, 10000 is good, we use 100 for speed
+
+```{r}
+predicted_paths <- simulateAR(y         = training_data,
+                              wsize       = 14,
+                              method      = "unweighted",
+                              pdays       = 28, 
+                              lambda      = seq(0,1,0.05),
+                              seed        = 12345,
+                              output_type = "predictions",
+                              nsim        = 100)
+```
+
+When output = "predictions", simulateAR() returns a data frame with pdays columns and nsim + 1 rows. The first column, t, indicates prediction day. The remaining columns each correspond to a different run of predictions. So predicted_paths[1:5, "X1"] contains daily predictions for the first five days in prediction path 1. 
+
+We are interested in the median prediction at each day.
+
+```{r}
+median_predictions <- apply(predicted_paths[,(-1)],1,median)
+```
+
+
+We plot the data.  The black line is the truth, the green line is predictions for 28 days, the red lines are paths.
+
+
+```{r, fig.show='hold'}
+par(mgp=c(2,0.75,0))
+plot(c(1,173),
+     c(0,1000),
+     type = "n",
+     axes = FALSE,
+     xlab = "",
+     ylab = "#Hospitalized")
+box()
+axis(1,
+     c(-2,29,59,90,121,151),
+     c(paste0("May\n", 20),
+       paste0("Jun\n", 20),
+       paste0("Jul\n", 20),
+       paste0("Aug\n", 20),
+       paste0("Sep\n", 20),
+       paste0("Oct\n", 20)),
+     las      = 1,
+     tck      = -0.01,
+     cex.axis = 0.8)
+axis(2)
+for(i in 1:100) {
+  lines(151:178,
+        predicted_paths[,(i+1)],
+        lty = 1,
+        col = 2)
+}
+
+lines(151:178,
+      median_predictions,
+      col = 3,
+      lwd = 3)
+lines(1:178,
+      county_hospitalizations$Santa.Clara[1:178])
+
+lines(c(150,150),
+      c(-100,10000),
+      col = "brown",
+      lwd = 2)
+
+text(65,500,"Training Data",
+     cex = 2)
+
+```

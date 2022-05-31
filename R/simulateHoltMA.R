@@ -18,8 +18,8 @@
 #' @return paths_ma is moving average matrix of paths
 #' @return smoothed_training is moving average of training data
 #' @return max_predictions is maximum for each row of paths_ma
-#' @import forecast
-#' @import pracma
+#' @importFrom forecast ets
+#' @importFrom pracma movavg
 
 #' @export
 #'

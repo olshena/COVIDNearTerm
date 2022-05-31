@@ -19,7 +19,7 @@ library(COVIDNearTerm)
 ```
 
 
-The purpose of this vignette is to show how to make hospitalization predictions using the COVIDNearTerm method using the COVIDNearTerm library.  We will focus on recreatig a figure like Figure 1 in (ref paper).
+The purpose of this vignette is to show how to make hospitalization predictions using the `COVIDNearTerm` method from the `COVIDNearTerm` library.  We will focus on recreating a figure like Figure 1 in (ref paper).
 
 
 ```{r eval = FALSE}
@@ -28,26 +28,34 @@ remotes::install_github(repo = 'olshena/COVIDNearTerm')
 library(COVIDNearTerm)
 ```
 
-The county_hospitalizations contains 308 days worth of hospitalization data from six Bay Area counties starting on May 1, 2020. We will make predictions using the 150 days from Santa Clara County as training data.
+The `county_hospitalizations` data set contains 308 days worth of hospitalization data from six Bay Area counties starting on May 1, 2020. We will make predictions using the 150 days from Santa Clara County as training data.
 
 ```{r}
 training_data <- county_hospitalizations$Santa.Clara[1:150]
 ```
 
-We will build the model and make predictions using the same function, simulateAR
+We will build the model and make predictions using the same function, `simulateAR`
 
 The arguments are:
-y is the training data
-wsize is the number of prior days to estimate the current hospitalization trend
-method is how to weigh the wsize prior days of hospitalizations, choices are equal (default), unequal, and traingle
-lambda is the shrinkage parameter, default is 0 for no shrinkage, but it is good to make nonzero
-pdays is the number of days to predict
-seed is the seed for the random generator
-output_type is the type of output, a good choice is "predictions" for predictions
-nsim is the number of simulations, 10000 is good, we use 100 for speed
+
+`vec` is the training data
+
+`wsize` is the number of prior days to estimate the current hospitalization trend
+
+`method` is how to weigh the `wsize` prior days of hospitalizations, choices are "equal" (default), "unequal", and "triangle"
+
+`lambda` is the shrinkage parameter, default is 0 for no shrinkage, but it is good to make nonzero
+
+`pdays` is the number of days to predict
+
+`seed` is the seed for the random generator
+
+`output_type` is the type of output, a good choice is "predictions" for predictions
+
+`nsim` is the number of simulations, 10000 is good, we use 100 for speed
 
 ```{r}
-predicted_paths <- simulateAR(y         = training_data,
+predicted_paths <- simulateAR(vec         = training_data,
                               wsize       = 14,
                               method      = "unweighted",
                               pdays       = 28, 
@@ -57,7 +65,7 @@ predicted_paths <- simulateAR(y         = training_data,
                               nsim        = 100)
 ```
 
-When output = "predictions", simulateAR() returns a data frame with pdays columns and nsim + 1 rows. The first column, t, indicates prediction day. The remaining columns each correspond to a different run of predictions. So predicted_paths[1:5, "X1"] contains daily predictions for the first five days in prediction path 1. 
+When `output = "predictions"`, `simulateAR()` returns a data frame with `pdays` columns and `nsim + 1` rows. The first column, `t`, indicates prediction day. The remaining columns each correspond to a different run of predictions. So `predicted_paths[1:5, "X1"]` contains daily predictions for the first five days in prediction path 1. 
 
 We are interested in the median prediction at each day.
 
@@ -66,10 +74,10 @@ median_predictions <- apply(predicted_paths[,(-1)],1,median)
 ```
 
 
-We plot the data.  The black line is the truth, the green line is predictions for 28 days, the red lines are paths.
+We plot the data.  
 
 
-```{r, fig.show='hold'}
+```{r, fig.width = 8, fig.asp = .62}
 par(mgp=c(2,0.75,0))
 plot(c(1,173),
      c(0,1000),
@@ -113,3 +121,5 @@ text(65,500,"Training Data",
      cex = 2)
 
 ```
+
+Each red line is a predicted path for daily hospitalizations. The green line is the median path for predicted hospitalizations, and the black line is the truth.

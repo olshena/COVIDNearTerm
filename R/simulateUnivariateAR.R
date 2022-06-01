@@ -27,7 +27,7 @@
 #' @import purrr
 #' @import reshape2
 #' @import lubridate
-#' @import zoo
+#' @importFrom zoo rollmean
 #'
 #' @export
 #'

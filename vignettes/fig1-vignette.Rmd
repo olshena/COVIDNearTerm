@@ -24,7 +24,7 @@ The purpose of this vignette is to show how to make hospitalization predictions 
 
 ```{r eval = FALSE}
 install.packages('remotes')
-remotes::install_github(repo = 'olshena/COVIDNearTerm')
+remotes::install_github(repo = 'olshena/COVIDNearTerm', build_vignettes = TRUE)
 library(COVIDNearTerm)
 ```
 

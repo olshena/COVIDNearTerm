@@ -337,32 +337,36 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(COVIDNearTerm)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Registered S3 method overwritten by &#39;quantmod&#39;:</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   method            from</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   as.zoo.data.frame zoo</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning: replacing previous import &#39;pracma::cross&#39; by &#39;purrr::cross&#39; when</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; loading &#39;COVIDNearTerm&#39;</span></span></code></pre></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   as.zoo.data.frame zoo</span></span></code></pre></div>
 <p>The purpose of this vignette is to show how to make hospitalization
-predictions using the COVIDNearTerm method using the COVIDNearTerm
-library. We will focus on recreatig a figure like Figure 1 in (ref
-paper).</p>
+predictions using the <code>COVIDNearTerm</code> method from the
+<code>COVIDNearTerm</code> library. We will focus on recreating a figure
+like Figure 1 in (ref paper).</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">&#39;remotes&#39;</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_github</span>(<span class="at">repo =</span> <span class="st">&#39;olshena/COVIDNearTerm&#39;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_github</span>(<span class="at">repo =</span> <span class="st">&#39;olshena/COVIDNearTerm&#39;</span>, <span class="at">build_vignettes =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(COVIDNearTerm)</span></code></pre></div>
-<p>The county_hospitalizations contains 308 days worth of
-hospitalization data from six Bay Area counties starting on May 1, 2020.
-We will make predictions using the 150 days from Santa Clara County as
-training data.</p>
+<p>The <code>county_hospitalizations</code> data set contains 308 days
+worth of hospitalization data from six Bay Area counties starting on May
+1, 2020. We will make predictions using the 150 days from Santa Clara
+County as training data.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>training_data <span class="ot">&lt;-</span> county_hospitalizations<span class="sc">$</span>Santa.Clara[<span class="dv">1</span><span class="sc">:</span><span class="dv">150</span>]</span></code></pre></div>
 <p>We will build the model and make predictions using the same function,
-simulateAR</p>
-<p>The arguments are: y is the training data wsize is the number of
-prior days to estimate the current hospitalization trend method is how
-to weigh the wsize prior days of hospitalizations, choices are equal
-(default), unequal, and traingle lambda is the shrinkage parameter,
-default is 0 for no shrinkage, but it is good to make nonzero pdays is
-the number of days to predict seed is the seed for the random generator
-output_type is the type of output, a good choice is “predictions” for
-predictions nsim is the number of simulations, 10000 is good, we use 100
-for speed</p>
+<code>simulateAR</code></p>
+<p>The arguments are:</p>
+<p><code>vec</code> is the training data</p>
+<p><code>wsize</code> is the number of prior days to estimate the
+current hospitalization trend</p>
+<p><code>method</code> is how to weigh the <code>wsize</code> prior days
+of hospitalizations, choices are “equal” (default), “unequal”, and
+“triangle”</p>
+<p><code>lambda</code> is the shrinkage parameter, default is 0 for no
+shrinkage, but it is good to make nonzero</p>
+<p><code>pdays</code> is the number of days to predict</p>
+<p><code>seed</code> is the seed for the random generator</p>
+<p><code>output_type</code> is the type of output, a good choice is
+“predictions” for predictions</p>
+<p><code>nsim</code> is the number of simulations, 10000 is good, we use
+100 for speed</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>predicted_paths <span class="ot">&lt;-</span> <span class="fu">simulateAR</span>(<span class="at">vec         =</span> training_data,</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>                              <span class="at">wsize       =</span> <span class="dv">14</span>,</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>                              <span class="at">method      =</span> <span class="st">&quot;unweighted&quot;</span>,</span>
@@ -371,11 +375,12 @@ for speed</p>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>                              <span class="at">seed        =</span> <span class="dv">12345</span>,</span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>                              <span class="at">output_type =</span> <span class="st">&quot;predictions&quot;</span>,</span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>                              <span class="at">nsim        =</span> <span class="dv">100</span>)</span></code></pre></div>
-<p>When output = “predictions”, simulateAR() returns a data frame with
-pdays columns and nsim + 1 rows. The first column, t, indicates
+<p>When <code>output = &quot;predictions&quot;</code>, <code>simulateAR()</code>
+returns a data frame with <code>pdays</code> columns and
+<code>nsim + 1</code> rows. The first column, <code>t</code>, indicates
 prediction day. The remaining columns each correspond to a different run
-of predictions. So predicted_paths[1:5, “X1”] contains daily predictions
-for the first five days in prediction path 1.</p>
+of predictions. So <code>predicted_paths[1:5, &quot;X1&quot;]</code> contains
+daily predictions for the first five days in prediction path 1.</p>
 <p>We are interested in the median prediction at each day.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>median_predictions <span class="ot">&lt;-</span> <span class="fu">apply</span>(predicted_paths[,(<span class="sc">-</span><span class="dv">1</span>)],<span class="dv">1</span>,median)</span></code></pre></div>
 <p>We plot the data.</p>

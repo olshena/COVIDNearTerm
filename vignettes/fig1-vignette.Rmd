@@ -1,8 +1,9 @@
 ---
-title: "fig1-vignette"
-output: rmarkdown::html_vignette
+title: "Generating path plot"
+output: 
+  rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{fig1-vignette}
+  %\VignetteIndexEntry{fig1}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
